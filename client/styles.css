@@ -3,14 +3,12 @@ html, body {
     height: 100%;
 }
 
-#canvasContainer {
-    background-color: peachpuff;
-    display: flex;
-    min-height: 100%;
-}
-
 #canvas {
     background-color: aliceblue;
-    flex-grow: 1;
+    margin: 10px;
+}
+
+#svg {
+    background-color: aliceblue;
     margin: 10px;
 }
