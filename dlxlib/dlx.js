@@ -160,13 +160,13 @@ class SearchState {
 
     searchStep() {
         if (this.onSearchStep) {
-            this.onSearchStep(this.currentSolution);
+            this.onSearchStep(this.currentSolution, this.root);
         }
     }
 
     solutionFound() {
         if (this.onSolutionFound) {
-            this.onSolutionFound(this.currentSolution);
+            this.onSolutionFound(this.currentSolution, this.root);
         }
     }
 }
