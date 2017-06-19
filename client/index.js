@@ -40,25 +40,105 @@ const rootToStructure = root => {
     };
 };
 
-const drawingArea = document.getElementById('canvas');
-const daWidth = drawingArea.scrollWidth;
-const daHeight = drawingArea.scrollHeight;
-const ctx = drawingArea.getContext('2d');
+class DrawingArea {
+}
 
-// class DrawingArea {
-//     constructor() {
-//     }
-// }
+class DrawingAreaCanvas extends DrawingArea {
 
-// class DrawingAreaCanvas extends DrawingArea {
-//     constructor() {
-//         super();
-//         this.canvas = document.getElementById('canvas');
-//         this.width = this.canvas.scrollWidth;
-//         this.height  = this.canvas.scrollHeight;
-//         this.ctx = this.canvas.getContext('2d');
-//     }
-// }
+    constructor(id) {
+        super();
+        this.canvas = document.getElementById(id);
+        this.width = this.canvas.scrollWidth;
+        this.height  = this.canvas.scrollHeight;
+        this.ctx = this.canvas.getContext('2d');
+    }
+
+    drawBorders() {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = 'green';
+        this.ctx.setLineDash([1, 4]);
+        this.ctx.moveTo(0, 0);
+        this.ctx.lineTo(this.width, 0);
+        this.ctx.lineTo(this.width, this.height);
+        this.ctx.lineTo(0, this.height);
+        this.ctx.closePath();
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+    }
+
+    drawDot(x, y) {
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 1, 0, Math.PI * 2, false);
+        this.ctx.fillStyle = 'green';
+        this.ctx.fill;
+        this.ctx.stroke();
+    }
+
+    drawNodeRect(node) {
+        this.ctx.strokeStyle = 'green';
+        this.ctx.strokeRect(node.x, node.y, node.width, node.height);
+    }
+
+    drawHorizontalLinks(n1, n2) {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = 'green';
+        this.ctx.moveTo(n1.nex, n1.ney);
+        this.ctx.lineTo(n2.x, n1.ney);
+        this.ctx.moveTo(n2.swx, n2.swy);
+        this.ctx.lineTo(n1.x + n1.width, n2.swy);
+        this.ctx.stroke();
+    }
+
+    drawHorizontalLinksToRightEdge(n) {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = 'green';
+        this.ctx.moveTo(n.nex, n.ney);
+        this.ctx.lineTo(this.width, n.ney);
+        this.ctx.moveTo(this.width, n.swy);
+        this.ctx.lineTo(n.x + n.width, n.swy);
+        this.ctx.stroke();
+    }
+
+    drawHorizontalLinksFromLeftEdge(n) {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = 'green';
+        this.ctx.moveTo(0, n.nwy);
+        this.ctx.lineTo(n.x, n.nwy);
+        this.ctx.moveTo(n.swx, n.swy);
+        this.ctx.lineTo(0, n.swy);
+        this.ctx.stroke();
+    }
+
+    drawVerticalLinks(n1, n2) {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = 'green';
+        this.ctx.moveTo(n1.sex, n1.sey);
+        this.ctx.lineTo(n1.sex, n2.y);
+        this.ctx.moveTo(n2.nwx, n2.nwy);
+        this.ctx.lineTo(n2.nwx, n1.y + n1.height);
+        this.ctx.stroke();
+    }
+
+    drawVerticalLinksToBottomEdge(n) {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = 'green';
+        this.ctx.moveTo(n.sex, n.sey);
+        this.ctx.lineTo(n.sex, this.height);
+        this.ctx.moveTo(n.nwx, this.height);
+        this.ctx.lineTo(n.nwx, n.y + n.height);
+        this.ctx.stroke();
+    }
+
+    drawVerticalLinksFromTopEdge(n) {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = 'green';
+        this.ctx.moveTo(n.nex, 0);
+        this.ctx.lineTo(n.nex, n.y);
+        this.ctx.moveTo(n.nwx, n.nwy);
+        this.ctx.lineTo(n.nwx, 0);
+        this.ctx.stroke();
+    }
+}
 
 // class DrawingAreaSvg extends DrawingArea {
 //     constructor() {
@@ -66,14 +146,10 @@ const ctx = drawingArea.getContext('2d');
 //     }
 // }
 
-const drawStructure = (root, nodes, numCols, numRows) => {
+const drawStructure = (root, nodes, numCols, numRows, drawingArea) => {
 
-    const nodeWidth = daWidth / (numCols + 1);
-    const nodeHeight = daHeight / (numRows + 2);
-
-    const RADIUS = 1;
-    const START_ANGLE = 0;
-    const END_ANGLE = Math.PI * 2;
+    const nodeWidth = drawingArea.width / (numCols + 1);
+    const nodeHeight = drawingArea.height / (numRows + 2);
 
     const blessRoot = () => {
         const node = root;
@@ -133,114 +209,53 @@ const drawStructure = (root, nodes, numCols, numRows) => {
 
     const blessNodes = () => nodes.forEach(blessNode);
 
-    const drawBorders = () => {
-        ctx.beginPath();
-        ctx.strokeStyle = 'green';
-        ctx.setLineDash([1, 4]);
-        ctx.moveTo(0, 0);
-        ctx.lineTo(daWidth, 0);
-        ctx.lineTo(daWidth, daHeight);
-        ctx.lineTo(0, daHeight);
-        ctx.closePath();
-        ctx.stroke();
-        ctx.setLineDash([]);
-    };
-
-    const drawDot = (x, y) => {
-        ctx.beginPath();
-        ctx.arc(x, y, RADIUS, START_ANGLE, END_ANGLE, false);
-        ctx.fillStyle = 'green';
-        ctx.fill;
-        ctx.stroke();
-    };
-
     const drawDots = node => {
-        drawDot(node.nwx, node.nwy);
-        drawDot(node.nex, node.ney);
-        drawDot(node.swx, node.swy);
-        drawDot(node.sex, node.sey);
-    };
-
-    const drawNodeRect = node => {
-        ctx.strokeStyle = 'green';
-        ctx.strokeRect(node.x, node.y, node.width, node.height);
+        drawingArea.drawDot(node.nwx, node.nwy);
+        drawingArea.drawDot(node.nex, node.ney);
+        drawingArea.drawDot(node.swx, node.swy);
+        drawingArea.drawDot(node.sex, node.sey);
     };
 
     const drawRoot = () => {
-        drawNodeRect(root);
+        drawingArea.drawNodeRect(root);
         drawDots(root);
     };
 
     const drawColumnHeader = colummHeader => {
-        drawNodeRect(colummHeader);
+        drawingArea.drawNodeRect(colummHeader);
         drawDots(colummHeader);
     };
 
-    const drawHorizontalLinks = linkPropertyName => node => {
-        const toNode = node[linkPropertyName];
-        if (toNode.colIndex > node.colIndex) {
-            ctx.beginPath();
-            ctx.strokeStyle = 'green';
-            ctx.moveTo(node.nex, node.ney);
-            ctx.lineTo(toNode.x, node.ney);
-            ctx.moveTo(toNode.swx, toNode.swy);
-            ctx.lineTo(node.x + node.width, toNode.swy);
-            ctx.stroke();
+    const drawHorizontalLinks = linkPropertyName => n1 => {
+        const n2 = n1[linkPropertyName];
+        if (n2.colIndex > n1.colIndex) {
+            drawingArea.drawHorizontalLinks(n1, n2);
         }
         else {
-            ctx.beginPath();
-            ctx.strokeStyle = 'green';
-
-            ctx.moveTo(node.nex, node.ney);
-            ctx.lineTo(daWidth, node.ney);
-            ctx.moveTo(daWidth, node.swy);
-            ctx.lineTo(node.x + node.width, node.swy);
-
-            ctx.moveTo(0, toNode.nwy);
-            ctx.lineTo(toNode.x, toNode.nwy);
-            ctx.moveTo(toNode.swx, toNode.swy);
-            ctx.lineTo(0, node.swy);
-            ctx.stroke();
+            drawingArea.drawHorizontalLinksToRightEdge(n1);
+            drawingArea.drawHorizontalLinksFromLeftEdge(n2);
         }
     };
 
-    const drawVerticalLinks = node => {
-        let toNode = node.down;
-        if (toNode.rowIndex > node.rowIndex) {
-            ctx.beginPath();
-            ctx.strokeStyle = 'green';
-            ctx.moveTo(node.sex, node.sey);
-            ctx.lineTo(node.sex, toNode.y);
-            ctx.moveTo(toNode.nwx, toNode.nwy);
-            ctx.lineTo(toNode.nwx, node.y + node.height);
-            ctx.stroke();
+    const drawVerticalLinks = n1 => {
+        let n2 = n1.down;
+        if (n2.rowIndex > n1.rowIndex) {
+            drawingArea.drawVerticalLinks(n1, n2);
         }
         else {
-            ctx.beginPath();
-            ctx.strokeStyle = 'green';
-
-            ctx.moveTo(node.sex, node.sey);
-            ctx.lineTo(node.sex, daHeight);
-            ctx.moveTo(toNode.nwx, daHeight);
-            ctx.lineTo(toNode.nwx, node.y + node.height);
-
-            ctx.moveTo(toNode.nex, 0);
-            ctx.lineTo(toNode.nex, toNode.y);
-            ctx.moveTo(toNode.nwx, toNode.nwy);
-            ctx.lineTo(toNode.nwx, 0);
-
-            ctx.stroke();
+            drawingArea.drawVerticalLinksToBottomEdge(n1);
+            drawingArea.drawVerticalLinksFromTopEdge(n2);
         }
     };
 
     const drawNode = node => {
-        drawNodeRect(node);
+        drawingArea.drawNodeRect(node);
         drawDots(node);
         drawHorizontalLinks('right')(node);
         drawVerticalLinks(node);
     };
 
-    drawBorders();
+    drawingArea.drawBorders();
 
     blessRoot();
     blessColumnHeaders();
@@ -257,11 +272,13 @@ const drawStructure = (root, nodes, numCols, numRows) => {
     nodes.forEach(drawVerticalLinks);
 };
 
+const drawingArea = new DrawingAreaCanvas('canvas');
+
 let firstStep = true;
 const onSearchStep = (xs, root) => {
     if (firstStep) {
         const { nodes, numCols, numRows } = rootToStructure(root);
-        drawStructure(root, nodes, numCols, numRows);
+        drawStructure(root, nodes, numCols, numRows, drawingArea);
         firstStep = false;
     }
 };
