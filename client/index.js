@@ -14,6 +14,7 @@ const rootToStructure = root => {
     let maxRowIndex = 0;
     let colIndex = 0;
     root.loopNext(columnHeader => {
+        columnHeader.colIndex = colIndex;
         columnHeader.loopDown(node => {
             nodes.push(node);
             node.colIndex = colIndex;
@@ -43,6 +44,58 @@ const drawStructure = (root, nodes, numCols, numRows) => {
     const START_ANGLE = 0;
     const END_ANGLE = Math.PI * 2;
 
+    const blessRoot = node => {
+        node.width = nodeWidth / 4;
+        node.height = node.width * 2;
+        node.x = (nodeWidth - node.width) / 2;
+        node.y = ((2 * nodeHeight) - node.height) / 2;
+        const inset = node.width / 4;
+        node.nwx = node.x + inset;
+        node.nwy = node.y + inset;
+        node.nex = node.x + node.width - inset;
+        node.ney = node.y + inset;
+        node.swx = node.x + inset;
+        node.sex = node.x + node.width - inset;
+        node.swy = node.y + node.height - inset;
+        node.sey = node.y + node.height - inset;
+    };
+
+    const blessColumnHeader = node => {
+        const xBase = nodeWidth * (node.colIndex + 1);
+        node.width = nodeWidth / 4;
+        node.height = node.width * 2;
+        node.x = xBase + ((nodeWidth - node.width) / 2);
+        node.y = ((2 * nodeHeight) - node.height) / 2;
+        const inset = node.width / 4;
+        node.nwx = node.x + inset;
+        node.nwy = node.y + inset;
+        node.nex = node.x + node.width - inset;
+        node.ney = node.y + inset;
+        node.swx = node.x + inset;
+        node.sex = node.x + node.width - inset;
+        node.swy = node.y + node.height - inset;
+        node.sey = node.y + node.height - inset;
+    };
+
+    const blessNode = node => {
+        const xBase = nodeWidth * (node.colIndex + 1);
+        const yBase = nodeHeight * (node.rowIndex + 2);
+        const side = Math.max(nodeWidth / 4, nodeHeight / 4);
+        node.x = xBase + ((nodeWidth - side) / 2);
+        node.y = yBase + ((nodeHeight - side) / 2);
+        node.width = side;
+        node.height = side;
+        const inset = side / 4;
+        node.nwx = node.x + inset;
+        node.nwy = node.y + inset;
+        node.nex = node.x + node.width - inset;
+        node.ney = node.y + inset;
+        node.swx = node.x + inset;
+        node.sex = node.x + node.width - inset;
+        node.swy = node.y + node.height - inset;
+        node.sey = node.y + node.height - inset;
+    };
+
     const drawDot = (x, y) => {
         ctx.beginPath();
         ctx.arc(x, y, RADIUS, START_ANGLE, END_ANGLE, false);
@@ -66,54 +119,31 @@ const drawStructure = (root, nodes, numCols, numRows) => {
 
     const drawRoot = () => {
         ctx.strokeStyle = 'green';
-        const width = nodeWidth / 4;
-        const height = width * 2;
-        const x = (nodeWidth - width) / 2;
-        const y = ((2 * nodeHeight) - height) / 2;
-        ctx.strokeRect(x, y, width, height);
-        const inset = width / 4;
-        drawDot(x + inset, y + inset);
-        drawDot(x + width - inset, y + inset);
-        drawDot(x + inset, y + height - inset);
-        drawDot(x + width - inset, y + height - inset);
+        ctx.strokeRect(root.x, root.y, root.width, root.height);
+        drawDot(root.nwx, root.nwy);
+        drawDot(root.nex, root.ney);
+        drawDot(root.swx, root.swy);
+        drawDot(root.sex, root.sey);
     };
 
-    const drawColumnHeader = col => {
+    const drawColumnHeader = colummHeader => {
         ctx.strokeStyle = 'green';
-        const xBase = nodeWidth * (col + 1);
-        const yBase = 0;
-        const width = nodeWidth / 4;
-        const height = width * 2;
-        const x = xBase + ((nodeWidth - width) / 2);
-        const y = yBase + (((2 * nodeHeight) - height) / 2);
-        ctx.strokeRect(x, y, width, height);
-        const inset = width / 4;
-        drawDot(x + inset, y + inset);
-        drawDot(x + width - inset, y + inset);
-        drawDot(x + inset, y + height - inset);
-        drawDot(x + width - inset, y + height - inset);
+        ctx.strokeRect(colummHeader.x, colummHeader.y, colummHeader.width, colummHeader.height);
+        drawDot(colummHeader.nwx, colummHeader.nwy);
+        drawDot(colummHeader.nex, colummHeader.ney);
+        drawDot(colummHeader.swx, colummHeader.swy);
+        drawDot(colummHeader.sex, colummHeader.sey);
     };
 
     const drawRightLink = node => {
         const toNode = node.right;
         if (toNode.colIndex > node.colIndex) {
-            const x1Base = nodeWidth * (node.colIndex + 1);
-            const x2Base = nodeWidth * (toNode.colIndex + 1);
-            const yBase = nodeHeight * (node.rowIndex + 2);
-            const side = Math.max(nodeWidth / 4, nodeHeight / 4);
-            const x1 = x1Base + ((nodeWidth - side) / 2);
-            const x2 = x2Base + ((nodeWidth - side) / 2);
-            const y = yBase + ((nodeHeight - side) / 2);
-            const inset = side / 4;
             ctx.beginPath();
             ctx.strokeStyle = 'green';
-            ctx.moveTo(x1 + side - inset, y + inset);
-            ctx.lineTo(x2, y + inset);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.strokeStyle = 'green';
-            ctx.moveTo(x2 + inset, y + side - inset);
-            ctx.lineTo(x1 + side, y + side - inset);
+            ctx.moveTo(node.nex, node.ney);
+            ctx.lineTo(toNode.x, node.ney);
+            ctx.moveTo(toNode.swx, toNode.swy);
+            ctx.lineTo(node.x + node.width, toNode.swy);
             ctx.stroke();
         }
         else {
@@ -124,23 +154,12 @@ const drawStructure = (root, nodes, numCols, numRows) => {
     const drawDownLink = node => {
         let toNode = node.down;
         if (toNode.rowIndex > node.rowIndex) {
-            const xBase = nodeWidth * (node.colIndex + 1);
-            const y1Base = nodeHeight * (node.rowIndex + 2);
-            const y2Base = nodeHeight * (toNode.rowIndex + 2);
-            const side = Math.max(nodeWidth / 4, nodeHeight / 4);
-            const x = xBase + ((nodeWidth - side) / 2);
-            const y1 = y1Base + ((nodeHeight - side) / 2);
-            const y2 = y2Base + ((nodeHeight - side) / 2);
-            const inset = side / 4;
             ctx.beginPath();
             ctx.strokeStyle = 'green';
-            ctx.moveTo(x + side - inset, y1 + side - inset);
-            ctx.lineTo(x + side - inset, y2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.strokeStyle = 'green';
-            ctx.moveTo(x + inset, y2 + inset);
-            ctx.lineTo(x + inset, y1 + side);
+            ctx.moveTo(node.sex, node.sey);
+            ctx.lineTo(node.sex, toNode.y);
+            ctx.moveTo(toNode.nwx, toNode.nwy);
+            ctx.lineTo(toNode.nwx, node.y + node.height);
             ctx.stroke();
         }
         else {
@@ -149,33 +168,25 @@ const drawStructure = (root, nodes, numCols, numRows) => {
     };
 
     const drawNode = node => {
-        const col = node.colIndex;
-        const row = node.rowIndex;
-        if (node) {
-            ctx.strokeStyle = 'green';
-            const xBase = nodeWidth * (col + 1);
-            const yBase = nodeHeight * (row + 2);
-            const side = Math.max(nodeWidth / 4, nodeHeight / 4);
-            const x = xBase + ((nodeWidth - side) / 2);
-            const y = yBase + ((nodeHeight - side) / 2);
-            ctx.strokeRect(x, y, side, side);
-            const inset = side / 4;
-            drawDot(x + inset, y + inset);
-            drawDot(x + side - inset, y + inset);
-            drawDot(x + inset, y + side - inset);
-            drawDot(x + side - inset, y + side - inset);
-            drawRightLink(node);
-            drawDownLink(node);
-        }
+        ctx.strokeStyle = 'green';
+        ctx.strokeRect(node.x, node.y, node.width, node.height);
+        drawDot(node.nwx, node.nwy);
+        drawDot(node.nex, node.ney);
+        drawDot(node.swx, node.swy);
+        drawDot(node.sex, node.sey);
+        drawRightLink(node);
+        drawDownLink(node);
     };
 
     drawBorders();
+
+    blessRoot(root);
     drawRoot();
 
-    for (let col = 0; col < numCols; col++) {
-        drawColumnHeader(col);
-    }
+    root.loopNext(blessColumnHeader);
+    root.loopNext(drawColumnHeader);
 
+    nodes.forEach(blessNode);
     nodes.forEach(drawNode);
 };
 
