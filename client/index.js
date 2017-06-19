@@ -40,21 +40,43 @@ const rootToStructure = root => {
     };
 };
 
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+const drawingArea = document.getElementById('canvas');
+const daWidth = drawingArea.scrollWidth;
+const daHeight = drawingArea.scrollHeight;
+const ctx = drawingArea.getContext('2d');
+
+// class DrawingArea {
+//     constructor() {
+//     }
+// }
+
+// class DrawingAreaCanvas extends DrawingArea {
+//     constructor() {
+//         super();
+//         this.canvas = document.getElementById('canvas');
+//         this.width = this.canvas.scrollWidth;
+//         this.height  = this.canvas.scrollHeight;
+//         this.ctx = this.canvas.getContext('2d');
+//     }
+// }
+
+// class DrawingAreaSvg extends DrawingArea {
+//     constructor() {
+//         super();
+//     }
+// }
 
 const drawStructure = (root, nodes, numCols, numRows) => {
 
-    const cw = canvas.scrollWidth;
-    const ch = canvas.scrollHeight;
-    const nodeWidth = cw / (numCols + 1);
-    const nodeHeight = ch / (numRows + 2);
+    const nodeWidth = daWidth / (numCols + 1);
+    const nodeHeight = daHeight / (numRows + 2);
 
     const RADIUS = 1;
     const START_ANGLE = 0;
     const END_ANGLE = Math.PI * 2;
 
-    const blessRoot = node => {
+    const blessRoot = () => {
+        const node = root;
         node.width = nodeWidth / 4;
         node.height = node.width * 2;
         node.x = (nodeWidth - node.width) / 2;
@@ -70,7 +92,8 @@ const drawStructure = (root, nodes, numCols, numRows) => {
         node.sey = node.y + node.height - inset;
     };
 
-    const blessColumnHeader = node => {
+    const blessColumnHeader = columnHeader => {
+        const node = columnHeader;
         const xBase = nodeWidth * (node.colIndex + 1);
         node.width = nodeWidth / 4;
         node.height = node.width * 2;
@@ -86,6 +109,8 @@ const drawStructure = (root, nodes, numCols, numRows) => {
         node.swy = node.y + node.height - inset;
         node.sey = node.y + node.height - inset;
     };
+
+    const blessColumnHeaders = () => root.loopNext(blessColumnHeader);
 
     const blessNode = node => {
         const xBase = nodeWidth * (node.colIndex + 1);
@@ -106,6 +131,21 @@ const drawStructure = (root, nodes, numCols, numRows) => {
         node.sey = node.y + node.height - inset;
     };
 
+    const blessNodes = () => nodes.forEach(blessNode);
+
+    const drawBorders = () => {
+        ctx.beginPath();
+        ctx.strokeStyle = 'green';
+        ctx.setLineDash([1, 4]);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(daWidth, 0);
+        ctx.lineTo(daWidth, daHeight);
+        ctx.lineTo(0, daHeight);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.setLineDash([]);
+    };
+
     const drawDot = (x, y) => {
         ctx.beginPath();
         ctx.arc(x, y, RADIUS, START_ANGLE, END_ANGLE, false);
@@ -114,38 +154,29 @@ const drawStructure = (root, nodes, numCols, numRows) => {
         ctx.stroke();
     };
 
-    const drawBorders = () => {
-        ctx.beginPath();
+    const drawDots = node => {
+        drawDot(node.nwx, node.nwy);
+        drawDot(node.nex, node.ney);
+        drawDot(node.swx, node.swy);
+        drawDot(node.sex, node.sey);
+    };
+
+    const drawNodeRect = node => {
         ctx.strokeStyle = 'green';
-        ctx.setLineDash([1, 4]);
-        ctx.moveTo(0, 0);
-        ctx.lineTo(cw, 0);
-        ctx.lineTo(cw, ch);
-        ctx.lineTo(0, ch);
-        ctx.closePath();
-        ctx.stroke();
-        ctx.setLineDash([]);
+        ctx.strokeRect(node.x, node.y, node.width, node.height);
     };
 
     const drawRoot = () => {
-        ctx.strokeStyle = 'green';
-        ctx.strokeRect(root.x, root.y, root.width, root.height);
-        drawDot(root.nwx, root.nwy);
-        drawDot(root.nex, root.ney);
-        drawDot(root.swx, root.swy);
-        drawDot(root.sex, root.sey);
+        drawNodeRect(root);
+        drawDots(root);
     };
 
     const drawColumnHeader = colummHeader => {
-        ctx.strokeStyle = 'green';
-        ctx.strokeRect(colummHeader.x, colummHeader.y, colummHeader.width, colummHeader.height);
-        drawDot(colummHeader.nwx, colummHeader.nwy);
-        drawDot(colummHeader.nex, colummHeader.ney);
-        drawDot(colummHeader.swx, colummHeader.swy);
-        drawDot(colummHeader.sex, colummHeader.sey);
+        drawNodeRect(colummHeader);
+        drawDots(colummHeader);
     };
 
-    const drawRightLink = (node, linkPropertyName) => {
+    const drawHorizontalLinks = linkPropertyName => node => {
         const toNode = node[linkPropertyName];
         if (toNode.colIndex > node.colIndex) {
             ctx.beginPath();
@@ -161,8 +192,8 @@ const drawStructure = (root, nodes, numCols, numRows) => {
             ctx.strokeStyle = 'green';
 
             ctx.moveTo(node.nex, node.ney);
-            ctx.lineTo(cw, node.ney);
-            ctx.moveTo(cw, node.swy);
+            ctx.lineTo(daWidth, node.ney);
+            ctx.moveTo(daWidth, node.swy);
             ctx.lineTo(node.x + node.width, node.swy);
 
             ctx.moveTo(0, toNode.nwy);
@@ -173,7 +204,7 @@ const drawStructure = (root, nodes, numCols, numRows) => {
         }
     };
 
-    const drawDownLink = node => {
+    const drawVerticalLinks = node => {
         let toNode = node.down;
         if (toNode.rowIndex > node.rowIndex) {
             ctx.beginPath();
@@ -189,8 +220,8 @@ const drawStructure = (root, nodes, numCols, numRows) => {
             ctx.strokeStyle = 'green';
 
             ctx.moveTo(node.sex, node.sey);
-            ctx.lineTo(node.sex, ch);
-            ctx.moveTo(toNode.nwx, ch);
+            ctx.lineTo(node.sex, daHeight);
+            ctx.moveTo(toNode.nwx, daHeight);
             ctx.lineTo(toNode.nwx, node.y + node.height);
 
             ctx.moveTo(toNode.nex, 0);
@@ -203,37 +234,33 @@ const drawStructure = (root, nodes, numCols, numRows) => {
     };
 
     const drawNode = node => {
-        ctx.strokeStyle = 'green';
-        ctx.strokeRect(node.x, node.y, node.width, node.height);
-        drawDot(node.nwx, node.nwy);
-        drawDot(node.nex, node.ney);
-        drawDot(node.swx, node.swy);
-        drawDot(node.sex, node.sey);
-        drawRightLink(node, 'right');
-        drawDownLink(node);
+        drawNodeRect(node);
+        drawDots(node);
+        drawHorizontalLinks('right')(node);
+        drawVerticalLinks(node);
     };
 
     drawBorders();
 
-    blessRoot(root);
-    nodes.forEach(blessNode);
-    root.loopNext(blessColumnHeader);
+    blessRoot();
+    blessColumnHeaders();
+    blessNodes();
 
     drawRoot();
-
     root.loopNext(drawColumnHeader);
-    root.loopNext(columnHeader => drawRightLink(columnHeader, 'nextColumnObject'));
-    root.loopNext(drawDownLink);
-    drawRightLink(root, 'nextColumnObject');
-
     nodes.forEach(drawNode);
+
+    drawHorizontalLinks('nextColumnObject')(root);
+    root.loopNext(drawHorizontalLinks('nextColumnObject'));
+    root.loopNext(drawVerticalLinks);
+    nodes.forEach(drawHorizontalLinks('right'));
+    nodes.forEach(drawVerticalLinks);
 };
 
 let firstStep = true;
 const onSearchStep = (xs, root) => {
     if (firstStep) {
         const { nodes, numCols, numRows } = rootToStructure(root);
-        console.log(`numRows: ${numRows}; numCols: ${numCols}`);
         drawStructure(root, nodes, numCols, numRows);
         firstStep = false;
     }
