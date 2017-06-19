@@ -9,6 +9,7 @@ const serverPublic = path.join(__dirname, 'server', 'public');
 module.exports = {
     entry: [
         'babel-polyfill',
+        './dlxlib/index.js',
         './client/index.js'
     ],
     output: {
