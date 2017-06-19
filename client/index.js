@@ -10,6 +10,7 @@ const matrix = [
 ];
 
 const rootToStructure = root => {
+    root.colIndex = -1;
     const nodes = [];
     let maxRowIndex = 0;
     let colIndex = 0;
@@ -147,7 +148,17 @@ const drawStructure = (root, nodes, numCols, numRows) => {
             ctx.stroke();
         }
         else {
-            // TODO: draw a wrapping link.
+            ctx.beginPath();
+            ctx.strokeStyle = 'green';
+            ctx.moveTo(node.nex, node.ney);
+            ctx.lineTo(cw, node.ney);
+            ctx.moveTo(cw, node.swy);
+            ctx.lineTo(node.x + node.width, node.swy);
+            ctx.moveTo(0, toNode.nwy);
+            ctx.lineTo(toNode.x, toNode.nwy);
+            ctx.moveTo(toNode.swx, toNode.swy);
+            ctx.lineTo(0, node.swy);
+            ctx.stroke();
         }
     };
 
@@ -185,6 +196,8 @@ const drawStructure = (root, nodes, numCols, numRows) => {
 
     root.loopNext(blessColumnHeader);
     root.loopNext(drawColumnHeader);
+    root.loopNext(drawRightLink);
+    drawRightLink(root);
 
     nodes.forEach(blessNode);
     nodes.forEach(drawNode);
