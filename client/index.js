@@ -1,12 +1,21 @@
 import { solutionGenerator } from '../dlxlib';
 
+// const matrix = [
+//     [1, 0, 0, 0],
+//     [0, 1, 1, 0],
+//     [1, 0, 0, 1],
+//     [0, 0, 1, 1],
+//     [0, 1, 0, 0],
+//     [0, 0, 1, 0]
+// ];
+
 const matrix = [
-    [1, 0, 0, 0],
-    [0, 1, 1, 0],
-    [1, 0, 0, 1],
-    [0, 0, 1, 1],
-    [0, 1, 0, 0],
-    [0, 0, 1, 0]
+    [0, 0, 1, 0, 1, 1, 0],
+    [1, 0, 0, 1, 0, 0, 1],
+    [0, 1, 1, 0, 0, 1, 0],
+    [1, 0, 0, 1, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 1],
+    [0, 0, 0, 1, 1, 0, 1]      
 ];
 
 const rootToStructure = root => {
@@ -136,8 +145,8 @@ const drawStructure = (root, nodes, numCols, numRows) => {
         drawDot(colummHeader.sex, colummHeader.sey);
     };
 
-    const drawRightLink = node => {
-        const toNode = node.right;
+    const drawRightLink = (node, linkPropertyName) => {
+        const toNode = node[linkPropertyName];
         if (toNode.colIndex > node.colIndex) {
             ctx.beginPath();
             ctx.strokeStyle = 'green';
@@ -150,10 +159,12 @@ const drawStructure = (root, nodes, numCols, numRows) => {
         else {
             ctx.beginPath();
             ctx.strokeStyle = 'green';
+
             ctx.moveTo(node.nex, node.ney);
             ctx.lineTo(cw, node.ney);
             ctx.moveTo(cw, node.swy);
             ctx.lineTo(node.x + node.width, node.swy);
+
             ctx.moveTo(0, toNode.nwy);
             ctx.lineTo(toNode.x, toNode.nwy);
             ctx.moveTo(toNode.swx, toNode.swy);
@@ -174,7 +185,20 @@ const drawStructure = (root, nodes, numCols, numRows) => {
             ctx.stroke();
         }
         else {
-            // TODO: draw a wrapping link.
+            ctx.beginPath();
+            ctx.strokeStyle = 'green';
+
+            ctx.moveTo(node.sex, node.sey);
+            ctx.lineTo(node.sex, ch);
+            ctx.moveTo(toNode.nwx, ch);
+            ctx.lineTo(toNode.nwx, node.y + node.height);
+
+            ctx.moveTo(toNode.nex, 0);
+            ctx.lineTo(toNode.nex, toNode.y);
+            ctx.moveTo(toNode.nwx, toNode.nwy);
+            ctx.lineTo(toNode.nwx, 0);
+
+            ctx.stroke();
         }
     };
 
@@ -185,21 +209,23 @@ const drawStructure = (root, nodes, numCols, numRows) => {
         drawDot(node.nex, node.ney);
         drawDot(node.swx, node.swy);
         drawDot(node.sex, node.sey);
-        drawRightLink(node);
+        drawRightLink(node, 'right');
         drawDownLink(node);
     };
 
     drawBorders();
 
     blessRoot(root);
+    nodes.forEach(blessNode);
+    root.loopNext(blessColumnHeader);
+
     drawRoot();
 
-    root.loopNext(blessColumnHeader);
     root.loopNext(drawColumnHeader);
-    root.loopNext(drawRightLink);
-    drawRightLink(root);
+    root.loopNext(columnHeader => drawRightLink(columnHeader, 'nextColumnObject'));
+    root.loopNext(drawDownLink);
+    drawRightLink(root, 'nextColumnObject');
 
-    nodes.forEach(blessNode);
     nodes.forEach(drawNode);
 };
 
