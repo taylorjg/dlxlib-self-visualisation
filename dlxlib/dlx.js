@@ -68,20 +68,20 @@ export const solutionGenerator = function* (matrix, onSearchStep, onSolutionFoun
 
 const buildInternalStructure = matrix => {
 
-    const root = new ColumnObject();
+    const root = new ColumnObject(-1);
     const colIndexToListHeader = new Map();
 
     matrix.forEach((row, rowIndex) => {
         let firstDataObjectInThisRow = null;
         row.forEach((col, colIndex) => {
             if (rowIndex === 0) {
-                const listHeader = new ColumnObject();
+                const listHeader = new ColumnObject(colIndex);
                 root.appendColumnHeader(listHeader);
                 colIndexToListHeader.set(colIndex, listHeader);
             }
             if (col) {
                 const listHeader = colIndexToListHeader.get(colIndex);
-                const dataObject = new DataObject(listHeader, rowIndex);
+                const dataObject = new DataObject(listHeader, rowIndex, colIndex);
                 if (firstDataObjectInThisRow)
                     firstDataObjectInThisRow.appendToRow(dataObject);
                 else

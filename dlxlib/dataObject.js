@@ -1,8 +1,9 @@
 export class DataObject {
 
-    constructor(listHeader, rowIndex) {
+    constructor(listHeader, rowIndex, colIndex) {
         this.listHeader = listHeader;
         this.rowIndex = rowIndex;
+        this.colIndex = colIndex;
         this.up = this;
         this.down = this;
         this.left = this;

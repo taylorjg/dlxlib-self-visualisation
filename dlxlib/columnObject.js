@@ -2,8 +2,8 @@ import { DataObject } from './dataObject';
 
 export class ColumnObject extends DataObject {
 
-    constructor() {
-        super(null, -1);
+    constructor(colIndex) {
+        super(null, -1, colIndex);
         this.previousColumnObject = this;
         this.nextColumnObject = this;
         this.numberOfRows = 0;

@@ -10,7 +10,7 @@ export class DrawingAreaSvg {
         return document.createElementNS('http://www.w3.org/2000/svg', element);
     }
 
-    createLine(x1, y1, x2, y2, colour, dasharray) {
+    createLine(x1, y1, x2, y2, colour, dasharray, isLink) {
         const line = this.createElement('line');
         line.setAttribute('x1', x1);
         line.setAttribute('y1', y1);
@@ -20,6 +20,9 @@ export class DrawingAreaSvg {
         line.setAttribute('stroke-width', 0.5);
         if (dasharray) {
             line.setAttribute('stroke-dasharray', dasharray);
+        }
+        if (isLink) {
+            line.setAttribute('class', 'link');
         }
         this.svg.appendChild(line);
     }
@@ -61,32 +64,37 @@ export class DrawingAreaSvg {
     }
 
     drawHorizontalLinks(n1, n2) {
-        this.createLine(n1.nex, n1.ney, n2.x, n1.ney, 'green');
-        this.createLine(n2.swx, n2.swy, n1.x + n1.width, n2.swy, 'green');
+        this.createLine(n1.nex, n1.ney, n2.x, n1.ney, 'green', null, true);
+        this.createLine(n2.swx, n2.swy, n1.x + n1.width, n2.swy, 'green', null, true);
     }
 
     drawHorizontalLinksToRightEdge(n) {
-        this.createLine(n.nex, n.ney, this.width, n.ney, 'green');
-        this.createLine(this.width, n.swy, n.x + n.width, n.swy, 'green');
+        this.createLine(n.nex, n.ney, this.width, n.ney, 'green', null, true);
+        this.createLine(this.width, n.swy, n.x + n.width, n.swy, 'green', null, true);
     }
 
     drawHorizontalLinksFromLeftEdge(n) {
-        this.createLine(0, n.nwy, n.x, n.nwy, 'green');
-        this.createLine(n.swx, n.swy, 0, n.swy, 'green');
+        this.createLine(0, n.nwy, n.x, n.nwy, 'green', null, true);
+        this.createLine(n.swx, n.swy, 0, n.swy, 'green', null, true);
     }
 
     drawVerticalLinks(n1, n2) {
-        this.createLine(n1.sex, n1.sey, n1.sex, n2.y, 'green');
-        this.createLine(n2.nwx, n2.nwy, n2.nwx, n1.y + n1.height, 'green');
+        this.createLine(n1.sex, n1.sey, n1.sex, n2.y, 'green', null, true);
+        this.createLine(n2.nwx, n2.nwy, n2.nwx, n1.y + n1.height, 'green', null, true);
     }
 
     drawVerticalLinksToBottomEdge(n) {
-        this.createLine(n.sex, n.sey, n.sex, this.height, 'green');
-        this.createLine(n.nwx, this.height, n.nwx, n.y + n.height, 'green');
+        this.createLine(n.sex, n.sey, n.sex, this.height, 'green', null, true);
+        this.createLine(n.nwx, this.height, n.nwx, n.y + n.height, 'green', null, true);
     }
 
     drawVerticalLinksFromTopEdge(n) {
-        this.createLine(n.nex, 0, n.nex, n.y, 'green');
-        this.createLine(n.nwx, n.nwy, n.nwx, 0, 'green');
+        this.createLine(n.nex, 0, n.nex, n.y, 'green', null, true);
+        this.createLine(n.nwx, n.nwy, n.nwx, 0, 'green', null, true);
+    }
+
+    removeAllLinks() {
+        const links = document.getElementsByClassName('link');
+        Array.from(links).forEach(link => link.remove());
     }
 }
