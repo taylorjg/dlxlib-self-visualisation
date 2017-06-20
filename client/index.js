@@ -40,7 +40,7 @@ const rootToStructure = root => {
 
 const blessRoot = (nodeWidth, nodeHeight) => root => {
     const node = root;
-    node.width = nodeWidth / 4;
+    node.width = nodeWidth / 2;
     node.height = node.width * 2;
     node.x = (nodeWidth - node.width) / 2;
     node.y = ((2 * nodeHeight) - node.height) / 2;
@@ -58,7 +58,7 @@ const blessRoot = (nodeWidth, nodeHeight) => root => {
 const blessColumnHeader = (nodeWidth, nodeHeight) => columnHeader => {
     const node = columnHeader;
     const xBase = nodeWidth * (node.colIndex + 1);
-    node.width = nodeWidth / 4;
+    node.width = nodeWidth / 2;
     node.height = node.width * 2;
     node.x = xBase + ((nodeWidth - node.width) / 2);
     node.y = ((2 * nodeHeight) - node.height) / 2;
@@ -76,7 +76,7 @@ const blessColumnHeader = (nodeWidth, nodeHeight) => columnHeader => {
 const blessNode = (nodeWidth, nodeHeight) => node => {
     const xBase = nodeWidth * (node.colIndex + 1);
     const yBase = nodeHeight * (node.rowIndex + 2);
-    const side = Math.max(nodeWidth / 4, nodeHeight / 4);
+    const side = Math.max(nodeWidth / 2, nodeHeight / 2);
     node.x = xBase + ((nodeWidth - side) / 2);
     node.y = yBase + ((nodeHeight - side) / 2);
     node.width = side;
@@ -166,6 +166,8 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 
     blessRoot(nodeWidth, nodeHeight)(root);
     root.loopRight(blessColumnHeader(nodeWidth, nodeHeight));
+    root.loopRight(ch => ch.oldRight && blessColumnHeader(nodeWidth, nodeHeight)(ch.oldRight));
+    root.loopRight(ch => ch.oldLeft && blessColumnHeader(nodeWidth, nodeHeight)(ch.oldLeft));
     nodes.forEach(blessNode(nodeWidth, nodeHeight));
 
     drawHorizontalLinks(root);

@@ -77,10 +77,53 @@ export class DrawingAreaSvg {
         return `(${n.colIndex}, ${n.rowIndex})`;
     }
 
+    drawBezierLeft(n1, coveredNodes) {
+        const displacement = (n1.nex - n1.nwx) * 1.2;
+        const path = this.createElement('path');
+        const a = n1.nex;
+        const b = n1.ney;
+        const g = coveredNodes[0].nwx;
+        const h = b - displacement;
+        const e = a + ((g - a) / 2);
+        const f = b - (displacement / 2);
+        const c = e;
+        const d = b;
+        const data = `M${a} ${b} Q ${c} ${d}, ${e} ${f} T ${g} ${h}`;
+        path.setAttribute('d', data);
+        path.setAttribute('stroke', 'red');
+        path.setAttribute('stroke-width', 0.5);
+        path.setAttribute('fill-opacity', 0);
+        path.setAttribute('class', 'link');
+        this.svg.appendChild(path);
+    }
+
+    drawBezierRight(n2, coveredNodes) {
+        const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
+        const displacement = (n2.nex - n2.nwx) * 1.2;
+        const path = this.createElement('path');
+        const a = lastCoveredNode.nex;
+        const b = lastCoveredNode.ney - displacement;
+        const g = lastCoveredNode.nex + lastCoveredNode.width;
+        const h = n2.nwy;
+        const e = a + ((g - a) / 2);
+        const f = b + (displacement / 2);
+        const c = e;
+        const d = b;
+        const data = `M${a} ${b} Q ${c} ${d}, ${e} ${f} T ${g} ${h}`;
+        path.setAttribute('d', data);
+        path.setAttribute('stroke', 'red');
+        path.setAttribute('stroke-width', 0.5);
+        path.setAttribute('fill-opacity', 0);
+        path.setAttribute('class', 'link');
+        this.svg.appendChild(path);
+    }
+
     drawHorizontalLinks(n1, n2) {
         const coveredNodes = this.getHorizontalCoveredNodes(n1);
         if (coveredNodes.length) {
             console.log(`[drawHorizontalLinks] n1: ${this.n2s(n1)}; n2: ${this.n2s(n2)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
+            this.drawBezierLeft(n1, coveredNodes);
+            this.drawBezierRight(n2, coveredNodes);
         }
         this.createLine(n1.nex, n1.ney, n2.x, n1.ney, 'green', null, true);
         this.createLine(n2.swx, n2.swy, n1.x + n1.width, n2.swy, 'green', null, true);
