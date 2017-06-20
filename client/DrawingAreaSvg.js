@@ -63,32 +63,70 @@ export class DrawingAreaSvg {
         this.createRect(node.x, node.y, node.width, node.height, 'green');
     }
 
+    getHorizontalCoveredNodes(n) {
+        const f = (m, coveredNodes) => m.oldLeft && m.oldLeft !== n ? f(m.oldLeft, [m.oldLeft, ...coveredNodes]) : coveredNodes;
+        return n.oldRight ? f(n.oldRight, [n.oldRight]) : [];
+    }
+
+    getVerticalCoveredNodes(n) {
+        const f = (m, coveredNodes) => m.oldUp && m.oldUp !== n ? f(m.oldUp, [m.oldUp, ...coveredNodes]) : coveredNodes;
+        return n.oldDown ? f(n.oldDown, [n.oldDown]) : [];
+    }
+
+    n2s(n) {
+        return `(${n.colIndex}, ${n.rowIndex})`;
+    }
+
     drawHorizontalLinks(n1, n2) {
+        const coveredNodes = this.getHorizontalCoveredNodes(n1);
+        if (coveredNodes.length) {
+            console.log(`[drawHorizontalLinks] n1: ${this.n2s(n1)}; n2: ${this.n2s(n2)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
+        }
         this.createLine(n1.nex, n1.ney, n2.x, n1.ney, 'green', null, true);
         this.createLine(n2.swx, n2.swy, n1.x + n1.width, n2.swy, 'green', null, true);
     }
 
     drawHorizontalLinksToRightEdge(n) {
+        const coveredNodes = this.getHorizontalCoveredNodes(n);
+        if (coveredNodes.length) {
+            console.log(`[drawHorizontalLinksToRightEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
+        }
         this.createLine(n.nex, n.ney, this.width, n.ney, 'green', null, true);
         this.createLine(this.width, n.swy, n.x + n.width, n.swy, 'green', null, true);
     }
 
     drawHorizontalLinksFromLeftEdge(n) {
+        const coveredNodes = this.getHorizontalCoveredNodes(n);
+        if (coveredNodes.length) {
+            console.log(`[drawHorizontalLinksFromLeftEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
+        }
         this.createLine(0, n.nwy, n.x, n.nwy, 'green', null, true);
         this.createLine(n.swx, n.swy, 0, n.swy, 'green', null, true);
     }
 
     drawVerticalLinks(n1, n2) {
+        const coveredNodes = this.getVerticalCoveredNodes(n1);
+        if (coveredNodes.length) {
+            console.log(`[drawVerticalLinks] n1: ${this.n2s(n1)}; n2: ${this.n2s(n2)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
+        }
         this.createLine(n1.sex, n1.sey, n1.sex, n2.y, 'green', null, true);
         this.createLine(n2.nwx, n2.nwy, n2.nwx, n1.y + n1.height, 'green', null, true);
     }
 
     drawVerticalLinksToBottomEdge(n) {
+        const coveredNodes = this.getVerticalCoveredNodes(n);
+        if (coveredNodes.length) {
+            console.log(`[drawVerticalLinksToBottomEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
+        }
         this.createLine(n.sex, n.sey, n.sex, this.height, 'green', null, true);
         this.createLine(n.nwx, this.height, n.nwx, n.y + n.height, 'green', null, true);
     }
 
     drawVerticalLinksFromTopEdge(n) {
+        const coveredNodes = this.getVerticalCoveredNodes(n);
+        if (coveredNodes.length) {
+            console.log(`[drawVerticalLinksFromTopEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
+        }
         this.createLine(n.nex, 0, n.nex, n.y, 'green', null, true);
         this.createLine(n.nwx, n.nwy, n.nwx, 0, 'green', null, true);
     }
