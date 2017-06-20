@@ -13,14 +13,14 @@ export class DataObject {
         }
     }
 
-    appendToRow(dataObject) {
+    appendLeftRight(dataObject) {
         this.left.right = dataObject;
         dataObject.right = this;
         dataObject.left = this.left;
         this.left = dataObject;
     }
 
-    appendToColumn(dataObject) {
+    appendUpDown(dataObject) {
         this.up.down = dataObject;
         dataObject.down = this;
         dataObject.up = this.up;
@@ -28,6 +28,8 @@ export class DataObject {
     }
 
     unlinkFromColumn() {
+        this.down.oldUp = this;
+        this.up.oldDown = this;
         this.down.up = this.up;
         this.up.down = this.down;
     }
@@ -35,6 +37,8 @@ export class DataObject {
     relinkIntoColumn() {
         this.down.up = this;
         this.up.down = this;
+        delete this.down.oldUp;
+        delete this.up.oldDown;
     }
 
     loopUp(fn) { this.loop(fn, 'up'); }

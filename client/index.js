@@ -23,7 +23,7 @@ const rootToStructure = root => {
     const nodes = [];
     let maxRowIndex = 0;
     let colIndex = 0;
-    root.loopNext(columnHeader => {
+    root.loopRight(columnHeader => {
         columnHeader.loopDown(node => {
             nodes.push(node);
             if (node.rowIndex > maxRowIndex) maxRowIndex = node.rowIndex;
@@ -121,13 +121,13 @@ const drawInitialStructure = (root, drawingArea) => {
     };
 
     blessRoot(nodeWidth, nodeHeight)(root);
-    root.loopNext(blessColumnHeader(nodeWidth, nodeHeight));
+    root.loopRight(blessColumnHeader(nodeWidth, nodeHeight));
     nodes.forEach(blessNode(nodeWidth, nodeHeight));
 
     drawingArea.drawBorders();
 
     drawRoot();
-    root.loopNext(drawColumnHeader);
+    root.loopRight(drawColumnHeader);
     nodes.forEach(drawNode);
 
     return {
@@ -142,8 +142,8 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 
     const { nodes } = rootToStructure(root);
 
-    const drawHorizontalLinks = linkPropertyName => n1 => {
-        const n2 = n1[linkPropertyName];
+    const drawHorizontalLinks = n1 => {
+        const n2 = n1.right;
         if (n2.colIndex > n1.colIndex) {
             drawingArea.drawHorizontalLinks(n1, n2);
         }
@@ -165,13 +165,13 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
     };
 
     blessRoot(nodeWidth, nodeHeight)(root);
-    root.loopNext(blessColumnHeader(nodeWidth, nodeHeight));
+    root.loopRight(blessColumnHeader(nodeWidth, nodeHeight));
     nodes.forEach(blessNode(nodeWidth, nodeHeight));
 
-    drawHorizontalLinks('nextColumnObject')(root);
-    root.loopNext(drawHorizontalLinks('nextColumnObject'));
-    root.loopNext(drawVerticalLinks);
-    nodes.forEach(drawHorizontalLinks('right'));
+    drawHorizontalLinks(root);
+    root.loopRight(drawHorizontalLinks);
+    root.loopRight(drawVerticalLinks);
+    nodes.forEach(drawHorizontalLinks);
     nodes.forEach(drawVerticalLinks);
 };
 

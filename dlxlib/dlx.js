@@ -76,14 +76,14 @@ const buildInternalStructure = matrix => {
         row.forEach((col, colIndex) => {
             if (rowIndex === 0) {
                 const listHeader = new ColumnObject(colIndex);
-                root.appendColumnHeader(listHeader);
+                root.appendLeftRight(listHeader);
                 colIndexToListHeader.set(colIndex, listHeader);
             }
             if (col) {
                 const listHeader = colIndexToListHeader.get(colIndex);
                 const dataObject = new DataObject(listHeader, rowIndex, colIndex);
                 if (firstDataObjectInThisRow)
-                    firstDataObjectInThisRow.appendToRow(dataObject);
+                    firstDataObjectInThisRow.appendLeftRight(dataObject);
                 else
                     firstDataObjectInThisRow = dataObject;
             }
@@ -119,7 +119,7 @@ function* search(searchState) {
 
 const chooseColumnWithFewestRows = searchState => {
     let chosenColumn = null;
-    searchState.root.loopNext(column => {
+    searchState.root.loopRight(column => {
         if (!chosenColumn || column.numberOfRows < chosenColumn.numberOfRows) {
             chosenColumn = column;
         }
@@ -147,7 +147,7 @@ class SearchState {
     }
 
     isEmpty() {
-        return this.root.nextColumnObject === this.root;
+        return this.root.right === this.root;
     }
 
     pushRowIndex(rowIndex) {
