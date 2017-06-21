@@ -166,16 +166,43 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 
     blessRoot(nodeWidth, nodeHeight)(root);
     root.loopRight(blessColumnHeader(nodeWidth, nodeHeight));
-    root.loopRight(ch => {
-        if (ch.oldRight) {
-            blessColumnHeader(nodeWidth, nodeHeight)(ch.oldRight);
-            while (ch.oldLeft) {
-                blessColumnHeader(nodeWidth, nodeHeight)(ch.oldLeft);
-                ch = ch.oldLeft;
+
+    const blessCoveredNodes = columnHeader => {
+        columnHeader.loopDown(n => {
+            if (n.oldDown) {
+                blessNode(nodeWidth, nodeHeight)(n.oldDown);
+                n = n.oldDown;
+                while (n.oldUp) {
+                    blessNode(nodeWidth, nodeHeight)(n.oldUp);
+                    n = n.oldUp;
+                }
             }
-        }
-    });
-    root.loopRight(ch => ch.oldLeft && blessColumnHeader(nodeWidth, nodeHeight)(ch.oldLeft));
+        });
+        columnHeader.loopDown(n => n.oldUp && blessNode(nodeWidth, nodeHeight)(n.oldUp));
+    };
+
+    const blessCoveredColumnHeaders = () => {
+        root.loopRight(ch => {
+            if (ch.oldRight) {
+                blessColumnHeader(nodeWidth, nodeHeight)(ch.oldRight);
+                blessCoveredNodes(ch.oldRight);
+                ch = ch.oldRight;
+                while (ch.oldLeft) {
+                    blessColumnHeader(nodeWidth, nodeHeight)(ch.oldLeft);
+                    blessCoveredNodes(ch.oldLeft);
+                    ch = ch.oldLeft;
+                }
+            }
+        });
+        root.loopRight(ch => {
+            if (ch.oldLeft) {
+                blessColumnHeader(nodeWidth, nodeHeight)(ch.oldLeft);
+                blessCoveredNodes(ch.oldLeft);
+            }
+        });
+    };
+
+    blessCoveredColumnHeaders();
     nodes.forEach(blessNode(nodeWidth, nodeHeight));
 
     drawHorizontalLinks(root);
@@ -187,9 +214,45 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 
 const queue = [];
 const drawingArea = new DrawingAreaSvg('svg');
+const preSubMatrix = document.getElementById('preSubMatrix');
+const prePartialSolution = document.getElementById('prePartialSolution');
 const btnStep = document.getElementById('btnStep');
 let nodeWidth = undefined;
 let nodeHeight = undefined;
+
+const A = 'A'.codePointAt(0);
+const COLUMN_NAMES = matrix[0].map((_, index) => String.fromCodePoint(A + index));
+
+const populateSubMatrix = root => {
+    const ss = [];
+    const columnsPresent = [];
+    root.loopRight(ch => ch.colIndex >= 0 && columnsPresent.push(ch.colIndex));
+    ss.push(columnsPresent.map(colIndex => COLUMN_NAMES[colIndex]).join(' '));
+    const nodes = [];
+    root.loopRight(ch => ch.loopDown(n => nodes.push({ colIndex: n.colIndex, rowIndex: n.rowIndex })));
+    const rowIndices = Array.from(Array(matrix.length).keys());
+    rowIndices.forEach(rowIndex => {
+        const colIndicesOfOnes = nodes.filter(n => n.rowIndex === rowIndex).map(n => n.colIndex);
+        if (colIndicesOfOnes.length) {
+            const values = Array(matrix[0].length).fill(0);
+            colIndicesOfOnes.forEach(colIndex => values[colIndex] = 1);
+            const valuesPresent = values.filter((_, index) => columnsPresent.includes(index));
+            const s = valuesPresent.join(' ');
+            ss.push(s);
+        }
+    });
+    const s = ss.join('\n');
+    preSubMatrix.innerHTML = s;
+};
+
+const populatePartialSolution = rowIndices => {
+    const ss = [];
+    rowIndices.forEach(rowIndex => {
+        ss.push(`${rowIndex}: ${matrix[rowIndex].join(' ')}`);
+    });
+    const s = ss.join('\n');
+    prePartialSolution.innerHTML = s;
+};
 
 const onStep = () => {
     if (queue.length) {
@@ -204,8 +267,10 @@ const onStep = () => {
         // algorithm is deterministic - otherwise we wouldn't be able to
         // do it this way.
         let secondInstanceStepCount = 0;
-        const onSecondInstanceSearchStep = (_, root) => {
+        const onSecondInstanceSearchStep = (rowIndices, root) => {
             if (secondInstanceStepCount === index) {
+                populateSubMatrix(root);
+                populatePartialSolution(rowIndices);
                 drawLinks(nodeWidth, nodeHeight, root, drawingArea);
             }
             secondInstanceStepCount++;

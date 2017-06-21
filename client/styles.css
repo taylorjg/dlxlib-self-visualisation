@@ -16,3 +16,7 @@ html, body {
 button {
     margin-left: 10px;
 }
+
+#tables {
+    display: inline-block;
+}
