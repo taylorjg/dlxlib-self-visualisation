@@ -206,9 +206,9 @@ export class DrawingAreaSvg {
         this.drawBottomGoingRoundLink(n2, coveredNodes);
     }
 
-    drawVerticalGoingAroundLinks(/* n1, n2, coveredNodes */) {
-        // this.drawRightGoingAroundLink(n1, coveredNodes);
-        // this.drawLeftGoingRoundLink(n2, coveredNodes);
+    drawVerticalGoingAroundLinks(n1, n2, coveredNodes) {
+        this.drawRightGoingAroundLink(n1, coveredNodes);
+        this.drawLeftGoingRoundLink(n2, coveredNodes);
     }
 
     drawHorizontalLinks(n1, n2) {
@@ -232,11 +232,8 @@ export class DrawingAreaSvg {
     }
 
     drawHorizontalLinksFromLeftEdge(n) {
-        const coveredNodes = this.getHorizontalCoveredNodes(n);
-        if (coveredNodes.length) {
-            console.log(`[drawHorizontalLinksFromLeftEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
-        }
-        const bottomLineColour = coveredNodes.length ? 'red' : 'green';
+        const lastColCovered = !!n.left.oldRights.length;
+        const bottomLineColour = lastColCovered ? 'red' : 'green';
         this.createLine(0, n.nwy, n.x, n.nwy, 'green', null, true);
         this.createLine(n.swx, n.swy, 0, n.swy, bottomLineColour, null, true);
     }
@@ -262,11 +259,8 @@ export class DrawingAreaSvg {
     }
 
     drawVerticalLinksFromTopEdge(n) {
-        const coveredNodes = this.getVerticalCoveredNodes(n);
-        if (coveredNodes.length) {
-            console.log(`[drawVerticalLinksFromTopEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
-        }
-        const leftLineColour = coveredNodes.length ? 'red' : 'green';
+        const lastRowCovered = !!n.up.oldDowns.length;
+        const leftLineColour = lastRowCovered ? 'red' : 'green';
         this.createLine(n.nex, 0, n.nex, n.y, 'green', null, true);
         this.createLine(n.nwx, n.nwy, n.nwx, 0, leftLineColour, null, true);
     }

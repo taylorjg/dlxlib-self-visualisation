@@ -192,11 +192,17 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 
     const blessCoveredNodesOf = n => {
         const coveredNodes = getVerticalCoveredNodes(n);
-        coveredNodes.forEach(blessNode(nodeWidth, nodeHeight));
+        coveredNodes.forEach(n2 => {
+            console.log(`[blessCoveredNodesOf] n2.colIndex: ${n2.colIndex}; n2.rowIndex: ${n2.rowIndex}`);
+            blessNode(nodeWidth, nodeHeight)(n2);
+        });
     };
     const blessCoveredColumnHeadersOf = ch => {
+        blessCoveredNodesOf(ch);
+        ch.loopDown(blessCoveredNodesOf);
         const coveredNodes = getHorizontalCoveredNodes(ch);
         coveredNodes.forEach(ch2 => {
+            console.log(`[blessCoveredColumnHeadersOf] ch2.colIndex: ${ch2.colIndex}; ch2.rowIndex: ${ch2.rowIndex}`);
             blessColumnHeader(nodeWidth, nodeHeight)(ch2);
             blessCoveredNodesOf(ch2);
             ch2.loopDown(blessCoveredNodesOf);
@@ -211,17 +217,20 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
     nodes.forEach(drawHorizontalLinks);
     nodes.forEach(drawVerticalLinks);
 
-    // root.loopRight(ch =>
-    //     ch.oldRights.forEach(ch2 => {
-    //         drawHorizontalLinks(ch2);
-    //         drawVerticalLinks(ch2);
-    //         ch2.loopDown(n => {
-    //             n.oldDowns.forEach(n2 => {
-    //                 drawHorizontalLinks(n2);
-    //                 drawVerticalLinks(n2);
-    //             });
-    //         });
-    //     }));
+    // const drawLinksForCoveredNodesOf = n => {
+    //     const coveredNodes = getVerticalCoveredNodes(n);
+    //     coveredNodes.forEach(drawHorizontalLinks);
+    //     coveredNodes.forEach(drawVerticalLinks);
+    // };
+    // const drawLinksForCoveredColumnHeadersOf = ch => {
+    //     const coveredNodes = getHorizontalCoveredNodes(ch);
+    //     coveredNodes.forEach(ch2 => {
+    //         drawLinksForCoveredNodesOf(ch2);
+    //         ch2.loopDown(drawLinksForCoveredNodesOf);
+    //     });
+    // };
+    // drawLinksForCoveredColumnHeadersOf(root);
+    // root.loopRight(drawLinksForCoveredColumnHeadersOf);
 };
 
 const queue = [];
