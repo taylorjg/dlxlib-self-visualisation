@@ -115,6 +115,7 @@ export class DrawingAreaSvg {
         this.createPath(data, 'red');
     }
 
+    // TODO: we may need to "come in" after each covered node (like the "up" going around link does in figure 4, column D).
     drawBottomGoingRoundLink(n2, coveredNodes) {
 
         const firstCoveredNode = coveredNodes[0];
@@ -143,25 +144,25 @@ export class DrawingAreaSvg {
         this.createPath(data, 'red');
     }
 
-    drawRightGoingAroundLink(n1, n2, coveredNodes) {
+    drawRightGoingAroundLink(n1, coveredNodes) {
 
         const firstCoveredNode = coveredNodes[0];
         const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
         const displacement = (firstCoveredNode.nex - firstCoveredNode.nwx) * 1.2;
 
-        const a1 = n1.nex;
-        const b1 = n1.ney;
-        const g1 = firstCoveredNode.nwx;
-        const h1 = b1 - displacement;
+        const a1 = firstCoveredNode.nex;
+        const b1 = firstCoveredNode.ney - firstCoveredNode.width;
+        const g1 = a1 + displacement;
+        const h1 = firstCoveredNode.ney;
         const e1 = (a1 + g1) / 2;
         const f1 = (b1 + h1) / 2;
         const c1 = e1;
         const d1 = b1;
 
-        const a2 = lastCoveredNode.nex;
-        const b2 = h1;
-        const g2 = a2 + lastCoveredNode.width;
-        const h2 = b1;
+        const a2 = g1;
+        const b2 = lastCoveredNode.sey;
+        const g2 = a1;
+        const h2 = lastCoveredNode.sey + lastCoveredNode.width;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
         const c2 = e2;
@@ -171,31 +172,32 @@ export class DrawingAreaSvg {
         this.createPath(data, 'red');
     }
 
-    drawLeftGoingRoundLink(n1, n2, coveredNodes) {
+    // TODO: looks like we should "come in" after each covered node (see figure 4, column D).
+    drawLeftGoingRoundLink(n2, coveredNodes) {
 
         const firstCoveredNode = coveredNodes[0];
         const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
         const displacement = (firstCoveredNode.nex - firstCoveredNode.nwx) * 1.2;
 
-        const a1 = n2.swx;
-        const b1 = n2.swy;
-        const g1 = lastCoveredNode.sex;
-        const h1 = b1 + displacement;
+        const a1 = lastCoveredNode.swx;
+        const b1 = lastCoveredNode.swy + lastCoveredNode.width;
+        const g1 = a1 - displacement;
+        const h1 = lastCoveredNode.swy;
         const e1 = (a1 + g1) / 2;
         const f1 = (b1 + h1) / 2;
         const c1 = e1;
         const d1 = b1;
         
-        const a2 = firstCoveredNode.swx;
-        const b2 = h1;
-        const g2 = a2 - firstCoveredNode.width;
-        const h2 = b1;
+        const a2 = g1;
+        const b2 = firstCoveredNode.nwy;
+        const g2 = a1;
+        const h2 = b2 - firstCoveredNode.width;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
         const c2 = e2;
         const d2 = b2;
 
-        const data = `M${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
+        const data = `M${n2.nwx} ${n2.nwy} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
         this.createPath(data, 'red');
     }
 
@@ -205,8 +207,8 @@ export class DrawingAreaSvg {
     }
 
     drawVerticalGoingAroundLinks(/* n1, n2, coveredNodes */) {
-        // this.drawRightGoingAroundLink(n1, n2, coveredNodes);
-        // this.drawLeftGoingRoundLink(n1, n2, coveredNodes);
+        // this.drawRightGoingAroundLink(n1, coveredNodes);
+        // this.drawLeftGoingRoundLink(n2, coveredNodes);
     }
 
     drawHorizontalLinks(n1, n2) {
