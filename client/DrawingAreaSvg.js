@@ -156,8 +156,8 @@ export class DrawingAreaSvg {
         const h1 = firstCoveredNode.ney;
         const e1 = (a1 + g1) / 2;
         const f1 = (b1 + h1) / 2;
-        const c1 = e1;
-        const d1 = b1;
+        const c1 = a1;
+        const d1 = f1;
 
         const a2 = g1;
         const b2 = lastCoveredNode.sey;
@@ -165,8 +165,8 @@ export class DrawingAreaSvg {
         const h2 = lastCoveredNode.sey + lastCoveredNode.width;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
-        const c2 = e2;
-        const d2 = b2;
+        const c2 = a2;
+        const d2 = f2;
 
         const data = `M${n1.sex} ${n1.sey} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
         this.createPath(data, 'red');
@@ -185,8 +185,8 @@ export class DrawingAreaSvg {
         const h1 = lastCoveredNode.swy;
         const e1 = (a1 + g1) / 2;
         const f1 = (b1 + h1) / 2;
-        const c1 = e1;
-        const d1 = b1;
+        const c1 = a1;
+        const d1 = f1;
         
         const a2 = g1;
         const b2 = firstCoveredNode.nwy;
@@ -194,8 +194,8 @@ export class DrawingAreaSvg {
         const h2 = b2 - firstCoveredNode.width;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
-        const c2 = e2;
-        const d2 = b2;
+        const c2 = a2;
+        const d2 = f2;
 
         const data = `M${n2.nwx} ${n2.nwy} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
         this.createPath(data, 'red');
