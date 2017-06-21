@@ -74,11 +74,13 @@ export class DrawingAreaSvg {
     }
 
     getHorizontalCoveredNodes(n) {
-        return n.oldRights.slice().reverse();
+        const xs = n.oldRights.slice().reverse();
+        return xs.length ? xs.concat(this.getHorizontalCoveredNodes(xs[xs.length - 1])) : xs;
     }
 
     getVerticalCoveredNodes(n) {
-        return n.oldDowns.slice().reverse();
+        const xs = n.oldDowns.slice().reverse();
+        return xs.length ? xs.concat(this.getVerticalCoveredNodes(xs[xs.length - 1])) : xs;
     }
 
     n2s(n) {

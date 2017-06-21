@@ -148,6 +148,16 @@ const drawInitialStructure = (root, drawingArea) => {
     };
 };
 
+const getHorizontalCoveredNodes = n => {
+    const xs = n.oldRights.slice().reverse();
+    return xs.length ? xs.concat(getHorizontalCoveredNodes(xs[xs.length - 1])) : xs;
+};
+
+const getVerticalCoveredNodes = n => {
+    const xs = n.oldDowns.slice().reverse();
+    return xs.length ? xs.concat(getVerticalCoveredNodes(xs[xs.length - 1])) : xs;
+};
+
 const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 
     drawingArea.removeAllLinks();
@@ -180,30 +190,38 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
     root.loopRight(blessColumnHeader(nodeWidth, nodeHeight));
     nodes.forEach(blessNode(nodeWidth, nodeHeight));
 
-    const blessCoveredNodes = columnHeader =>
-        columnHeader.loopDown(n =>
-            n.oldDowns.forEach(n2 => blessNode(nodeWidth, nodeHeight)(n2)));
-
-    const blessCoveredColumnHeaders = () =>
-        root.loopRight(ch =>
-            ch.oldRights.forEach(ch2 => {
-                blessColumnHeader(nodeWidth, nodeHeight)(ch2);
-                blessCoveredNodes(ch2);
-                ch2.oldDowns.forEach(n => blessNode(nodeWidth, nodeHeight)(n));
-            }));
-
-    root.oldRights.forEach(ch => {
-        blessColumnHeader(nodeWidth, nodeHeight)(ch);
-        blessCoveredNodes(ch);
-    });
-
-    blessCoveredColumnHeaders();
+    const blessCoveredNodesOf = n => {
+        const coveredNodes = getVerticalCoveredNodes(n);
+        coveredNodes.forEach(blessNode(nodeWidth, nodeHeight));
+    };
+    const blessCoveredColumnHeadersOf = ch => {
+        const coveredNodes = getHorizontalCoveredNodes(ch);
+        coveredNodes.forEach(ch2 => {
+            blessColumnHeader(nodeWidth, nodeHeight)(ch2);
+            blessCoveredNodesOf(ch2);
+            ch2.loopDown(blessCoveredNodesOf);
+        });
+    };
+    blessCoveredColumnHeadersOf(root);
+    root.loopRight(blessCoveredColumnHeadersOf);
 
     drawHorizontalLinks(root);
     root.loopRight(drawHorizontalLinks);
     root.loopRight(drawVerticalLinks);
     nodes.forEach(drawHorizontalLinks);
     nodes.forEach(drawVerticalLinks);
+
+    // root.loopRight(ch =>
+    //     ch.oldRights.forEach(ch2 => {
+    //         drawHorizontalLinks(ch2);
+    //         drawVerticalLinks(ch2);
+    //         ch2.loopDown(n => {
+    //             n.oldDowns.forEach(n2 => {
+    //                 drawHorizontalLinks(n2);
+    //                 drawVerticalLinks(n2);
+    //             });
+    //         });
+    //     }));
 };
 
 const queue = [];
@@ -281,6 +299,7 @@ btnStep.addEventListener('click', onStep);
 
 const onSearchStep = (_, root) => {
     const index = queue.length;
+    console.log(`[onSearchStep] index: ${index}`);
     if (index === 0) {
         const dimensions = drawInitialStructure(root, drawingArea);
         nodeWidth = dimensions.nodeWidth;
