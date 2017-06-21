@@ -74,13 +74,11 @@ export class DrawingAreaSvg {
     }
 
     getHorizontalCoveredNodes(n) {
-        const f = (m, coveredNodes) => m.oldLeft && m.oldLeft !== n ? f(m.oldLeft, [m.oldLeft, ...coveredNodes]) : coveredNodes;
-        return n.oldRight ? f(n.oldRight, [n.oldRight]) : [];
+        return n.oldRights.slice().reverse();
     }
 
     getVerticalCoveredNodes(n) {
-        const f = (m, coveredNodes) => m.oldUp && m.oldUp !== n ? f(m.oldUp, [m.oldUp, ...coveredNodes]) : coveredNodes;
-        return n.oldDown ? f(n.oldDown, [n.oldDown]) : [];
+        return n.oldDowns.slice().reverse();
     }
 
     n2s(n) {

@@ -39,6 +39,10 @@ const rootToStructure = root => {
 };
 
 const blessRoot = (nodeWidth, nodeHeight) => root => {
+    if (root.colIndex !== -1 || root.rowIndex !== -1) {
+        console.warn(`[blessRoot] root.colIndex: ${root.colIndex}; root.rowIndex: ${root.rowIndex}`);
+        console.trace();
+    }
     const node = root;
     node.width = nodeWidth / 2;
     node.height = node.width * 2;
@@ -56,6 +60,10 @@ const blessRoot = (nodeWidth, nodeHeight) => root => {
 };
 
 const blessColumnHeader = (nodeWidth, nodeHeight) => columnHeader => {
+    if (columnHeader.colIndex < 0 || columnHeader.rowIndex !== -1) {
+        console.warn(`[blessColumnHeader] columnHeader.colIndex: ${columnHeader.colIndex}; columnHeader.rowIndex: ${columnHeader.rowIndex}`);
+        console.trace();
+    }
     const node = columnHeader;
     const xBase = nodeWidth * (node.colIndex + 1);
     node.width = nodeWidth / 2;
@@ -74,6 +82,10 @@ const blessColumnHeader = (nodeWidth, nodeHeight) => columnHeader => {
 };
 
 const blessNode = (nodeWidth, nodeHeight) => node => {
+    if (node.colIndex < 0 || node.rowIndex < 0) {
+        console.warn(`[blessNode] node.colIndex: ${node.colIndex}; node.rowIndex: ${node.rowIndex}`);
+        console.trace();
+    }
     const xBase = nodeWidth * (node.colIndex + 1);
     const yBase = nodeHeight * (node.rowIndex + 2);
     const side = Math.max(nodeWidth / 2, nodeHeight / 2);
@@ -166,44 +178,26 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 
     blessRoot(nodeWidth, nodeHeight)(root);
     root.loopRight(blessColumnHeader(nodeWidth, nodeHeight));
+    nodes.forEach(blessNode(nodeWidth, nodeHeight));
 
-    const blessCoveredNodes = columnHeader => {
-        columnHeader.loopDown(n => {
-            if (n.oldDown) {
-                blessNode(nodeWidth, nodeHeight)(n.oldDown);
-                n = n.oldDown;
-                while (n.oldUp) {
-                    blessNode(nodeWidth, nodeHeight)(n.oldUp);
-                    n = n.oldUp;
-                }
-            }
-        });
-        columnHeader.loopDown(n => n.oldUp && blessNode(nodeWidth, nodeHeight)(n.oldUp));
-    };
+    const blessCoveredNodes = columnHeader =>
+        columnHeader.loopDown(n =>
+            n.oldDowns.forEach(n2 => blessNode(nodeWidth, nodeHeight)(n2)));
 
-    const blessCoveredColumnHeaders = () => {
-        root.loopRight(ch => {
-            if (ch.oldRight) {
-                blessColumnHeader(nodeWidth, nodeHeight)(ch.oldRight);
-                blessCoveredNodes(ch.oldRight);
-                ch = ch.oldRight;
-                while (ch.oldLeft) {
-                    blessColumnHeader(nodeWidth, nodeHeight)(ch.oldLeft);
-                    blessCoveredNodes(ch.oldLeft);
-                    ch = ch.oldLeft;
-                }
-            }
-        });
-        root.loopRight(ch => {
-            if (ch.oldLeft) {
-                blessColumnHeader(nodeWidth, nodeHeight)(ch.oldLeft);
-                blessCoveredNodes(ch.oldLeft);
-            }
-        });
-    };
+    const blessCoveredColumnHeaders = () =>
+        root.loopRight(ch =>
+            ch.oldRights.forEach(ch2 => {
+                blessColumnHeader(nodeWidth, nodeHeight)(ch2);
+                blessCoveredNodes(ch2);
+                ch2.oldDowns.forEach(n => blessNode(nodeWidth, nodeHeight)(n));
+            }));
+
+    root.oldRights.forEach(ch => {
+        blessColumnHeader(nodeWidth, nodeHeight)(ch);
+        blessCoveredNodes(ch);
+    });
 
     blessCoveredColumnHeaders();
-    nodes.forEach(blessNode(nodeWidth, nodeHeight));
 
     drawHorizontalLinks(root);
     root.loopRight(drawHorizontalLinks);
