@@ -166,7 +166,15 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 
     blessRoot(nodeWidth, nodeHeight)(root);
     root.loopRight(blessColumnHeader(nodeWidth, nodeHeight));
-    root.loopRight(ch => ch.oldRight && blessColumnHeader(nodeWidth, nodeHeight)(ch.oldRight));
+    root.loopRight(ch => {
+        if (ch.oldRight) {
+            blessColumnHeader(nodeWidth, nodeHeight)(ch.oldRight);
+            while (ch.oldLeft) {
+                blessColumnHeader(nodeWidth, nodeHeight)(ch.oldLeft);
+                ch = ch.oldLeft;
+            }
+        }
+    });
     root.loopRight(ch => ch.oldLeft && blessColumnHeader(nodeWidth, nodeHeight)(ch.oldLeft));
     nodes.forEach(blessNode(nodeWidth, nodeHeight));
 
