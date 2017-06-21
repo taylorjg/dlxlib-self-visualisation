@@ -47,26 +47,11 @@ export class DrawingAreaSvg {
         this.svg.appendChild(rect);
     }
 
-    createBezier(a, b, g, h, colour) {
-        const e = (a + g) / 2;
-        const f = (b + h) / 2;
-        const c = e;
-        const d = b;
-        const data = `M${a} ${b} Q ${c} ${d}, ${e} ${f} T ${g} ${h}`;
-        const path = this.createElement('path');
-        path.setAttribute('d', data);
-        path.setAttribute('stroke', colour);
-        path.setAttribute('stroke-width', 0.5);
-        path.setAttribute('fill-opacity', 0);
-        path.setAttribute('class', 'link');
-        this.svg.appendChild(path);
-    }
-
     createPath(data, colour) {
         const path = this.createElement('path');
         path.setAttribute('d', data);
         path.setAttribute('stroke', colour);
-        path.setAttribute('stroke-width', 0.5);
+        path.setAttribute('stroke-width', 1);
         path.setAttribute('fill-opacity', 0);
         path.setAttribute('class', 'link');
         this.svg.appendChild(path);
@@ -102,49 +87,11 @@ export class DrawingAreaSvg {
         return `(${n.colIndex}, ${n.rowIndex})`;
     }
 
-    // drawBezierTopLeft(n1, coveredNodes) {
-    //     const displacement = (n1.nex - n1.nwx) * 1.2;
-    //     const a = n1.nex;
-    //     const b = n1.ney;
-    //     const g = coveredNodes[0].nwx;
-    //     const h = b - displacement;
-    //     this.createBezier(a, b, g, h, 'red');
-    // }
+    drawTopGoingAroundLink(n1, coveredNodes) {
 
-    // drawBezierTopRight(n2, coveredNodes) {
-    //     const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
-    //     const displacement = (n2.nex - n2.nwx) * 1.2;
-    //     const a = lastCoveredNode.nex;
-    //     const b = lastCoveredNode.ney - displacement;
-    //     const g = lastCoveredNode.nex + lastCoveredNode.width;
-    //     const h = n2.nwy;
-    //     this.createBezier(a, b, g, h, 'red');
-    // }
-
-    // drawBezierBottomRight(n2, coveredNodes) {
-    //     const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
-    //     const displacement = (n2.nex - n2.nwx) * 1.2;
-    //     const a = n2.swx;
-    //     const b = n2.swy;
-    //     const g = lastCoveredNode.sex;
-    //     const h = b + displacement;
-    //     this.createBezier(a, b, g, h, 'red');
-    // }
-
-    // drawBezierBottomLeft(n1, coveredNodes) {
-    //     const displacement = (n1.nex - n1.nwx) * 1.2;
-    //     const a = coveredNodes[0].swx;
-    //     const b = coveredNodes[0].swy + displacement;
-    //     const g = coveredNodes[0].swx - coveredNodes[0].width;
-    //     const h = coveredNodes[0].swy;
-    //     this.createBezier(a, b, g, h, 'red');
-    // }
-
-    drawTopGoingAroundLink(n1, n2, coveredNodes) {
-
-        const displacement = (n1.nex - n1.nwx) * 1.2;
         const firstCoveredNode = coveredNodes[0];
         const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
+        const displacement = (firstCoveredNode.nex - firstCoveredNode.nwx) * 1.2;
 
         const a1 = n1.nex;
         const b1 = n1.ney;
@@ -168,11 +115,11 @@ export class DrawingAreaSvg {
         this.createPath(data, 'red');
     }
 
-    drawBottomGoingRoundLink(n1, n2, coveredNodes) {
+    drawBottomGoingRoundLink(n2, coveredNodes) {
 
-        const displacement = (n1.nex - n1.nwx) * 1.2;
         const firstCoveredNode = coveredNodes[0];
         const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
+        const displacement = (firstCoveredNode.nex - firstCoveredNode.nwx) * 1.2;
 
         const a1 = n2.swx;
         const b1 = n2.swy;
@@ -184,9 +131,65 @@ export class DrawingAreaSvg {
         const d1 = b1;
         
         const a2 = firstCoveredNode.swx;
-        const b2 = firstCoveredNode.swy + displacement;
+        const b2 = h1;
         const g2 = a2 - firstCoveredNode.width;
-        const h2 = firstCoveredNode.swy;
+        const h2 = b1;
+        const e2 = (a2 + g2) / 2;
+        const f2 = (b2 + h2) / 2;
+        const c2 = e2;
+        const d2 = b2;
+
+        const data = `M${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
+        this.createPath(data, 'red');
+    }
+
+    drawRightGoingAroundLink(n1, n2, coveredNodes) {
+
+        const firstCoveredNode = coveredNodes[0];
+        const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
+        const displacement = (firstCoveredNode.nex - firstCoveredNode.nwx) * 1.2;
+
+        const a1 = n1.nex;
+        const b1 = n1.ney;
+        const g1 = firstCoveredNode.nwx;
+        const h1 = b1 - displacement;
+        const e1 = (a1 + g1) / 2;
+        const f1 = (b1 + h1) / 2;
+        const c1 = e1;
+        const d1 = b1;
+
+        const a2 = lastCoveredNode.nex;
+        const b2 = h1;
+        const g2 = a2 + lastCoveredNode.width;
+        const h2 = b1;
+        const e2 = (a2 + g2) / 2;
+        const f2 = (b2 + h2) / 2;
+        const c2 = e2;
+        const d2 = b2;
+
+        const data = `M${n1.sex} ${n1.sey} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
+        this.createPath(data, 'red');
+    }
+
+    drawLeftGoingRoundLink(n1, n2, coveredNodes) {
+
+        const firstCoveredNode = coveredNodes[0];
+        const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
+        const displacement = (firstCoveredNode.nex - firstCoveredNode.nwx) * 1.2;
+
+        const a1 = n2.swx;
+        const b1 = n2.swy;
+        const g1 = lastCoveredNode.sex;
+        const h1 = b1 + displacement;
+        const e1 = (a1 + g1) / 2;
+        const f1 = (b1 + h1) / 2;
+        const c1 = e1;
+        const d1 = b1;
+        
+        const a2 = firstCoveredNode.swx;
+        const b2 = h1;
+        const g2 = a2 - firstCoveredNode.width;
+        const h2 = b1;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
         const c2 = e2;
@@ -197,8 +200,13 @@ export class DrawingAreaSvg {
     }
 
     drawHorizontalGoingAroundLinks(n1, n2, coveredNodes) {
-        this.drawTopGoingAroundLink(n1, n2, coveredNodes);
-        this.drawBottomGoingRoundLink(n1, n2, coveredNodes);
+        this.drawTopGoingAroundLink(n1, coveredNodes);
+        this.drawBottomGoingRoundLink(n2, coveredNodes);
+    }
+
+    drawVerticalGoingAroundLinks(/* n1, n2, coveredNodes */) {
+        // this.drawRightGoingAroundLink(n1, n2, coveredNodes);
+        // this.drawLeftGoingRoundLink(n1, n2, coveredNodes);
     }
 
     drawHorizontalLinks(n1, n2) {
@@ -215,8 +223,7 @@ export class DrawingAreaSvg {
         const coveredNodes = this.getHorizontalCoveredNodes(n);
         if (coveredNodes.length) {
             console.log(`[drawHorizontalLinksToRightEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
-            // this.drawBezierTopLeft(n, coveredNodes);
-            // this.drawBezierTopRight(n, coveredNodes);
+            this.drawHorizontalGoingAroundLinks(n, { swx: this.width, swy: n.swy }, coveredNodes);
         }
         this.createLine(n.nex, n.ney, this.width, n.ney, 'green', null, true);
         this.createLine(this.width, n.swy, n.x + n.width, n.swy, 'green', null, true);
@@ -227,14 +234,16 @@ export class DrawingAreaSvg {
         if (coveredNodes.length) {
             console.log(`[drawHorizontalLinksFromLeftEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
         }
+        const bottomLineColour = coveredNodes.length ? 'red' : 'green';
         this.createLine(0, n.nwy, n.x, n.nwy, 'green', null, true);
-        this.createLine(n.swx, n.swy, 0, n.swy, 'green', null, true);
+        this.createLine(n.swx, n.swy, 0, n.swy, bottomLineColour, null, true);
     }
 
     drawVerticalLinks(n1, n2) {
         const coveredNodes = this.getVerticalCoveredNodes(n1);
         if (coveredNodes.length) {
             console.log(`[drawVerticalLinks] n1: ${this.n2s(n1)}; n2: ${this.n2s(n2)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
+            this.drawVerticalGoingAroundLinks(n1, n2, coveredNodes);
         }
         this.createLine(n1.sex, n1.sey, n1.sex, n2.y, 'green', null, true);
         this.createLine(n2.nwx, n2.nwy, n2.nwx, n1.y + n1.height, 'green', null, true);
@@ -244,6 +253,7 @@ export class DrawingAreaSvg {
         const coveredNodes = this.getVerticalCoveredNodes(n);
         if (coveredNodes.length) {
             console.log(`[drawVerticalLinksToBottomEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
+            this.drawVerticalGoingAroundLinks(n, { nwx: n.nwx, nwy: this.height }, coveredNodes);
         }
         this.createLine(n.sex, n.sey, n.sex, this.height, 'green', null, true);
         this.createLine(n.nwx, this.height, n.nwx, n.y + n.height, 'green', null, true);
@@ -254,8 +264,9 @@ export class DrawingAreaSvg {
         if (coveredNodes.length) {
             console.log(`[drawVerticalLinksFromTopEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
         }
+        const leftLineColour = coveredNodes.length ? 'red' : 'green';
         this.createLine(n.nex, 0, n.nex, n.y, 'green', null, true);
-        this.createLine(n.nwx, n.nwy, n.nwx, 0, 'green', null, true);
+        this.createLine(n.nwx, n.nwy, n.nwx, 0, leftLineColour, null, true);
     }
 
     removeAllLinks() {
