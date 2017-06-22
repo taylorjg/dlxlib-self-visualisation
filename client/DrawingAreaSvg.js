@@ -1,9 +1,11 @@
 export class DrawingAreaSvg {
 
-    constructor(id) {
-        this.svg = document.getElementById(id);
+    constructor(svg) {
+        this.svg = svg;
         this.width = this.svg.scrollWidth;
         this.height  = this.svg.scrollHeight;
+        this.elements = [];
+        this.coveredNodes = [];
     }
 
     createElement(element) {
@@ -24,7 +26,8 @@ export class DrawingAreaSvg {
         if (isLink) {
             line.setAttribute('class', 'link');
         }
-        this.svg.appendChild(line);
+        this.elements.push(line);
+        return line;
     }
 
     createCircle(cx, cy, r, colour) {
@@ -33,7 +36,8 @@ export class DrawingAreaSvg {
         circle.setAttribute('cy', cy);
         circle.setAttribute('r', r);
         circle.setAttribute('fill', colour);
-        this.svg.appendChild(circle);
+        this.elements.push(circle);
+        return circle;
     }
 
     createRect(x, y, width, height, colour) {
@@ -44,7 +48,7 @@ export class DrawingAreaSvg {
         rect.setAttribute('height', height);
         rect.setAttribute('stroke', colour);
         rect.setAttribute('fill-opacity', 0);
-        this.svg.appendChild(rect);
+        this.elements.push(rect);
         return rect;
     }
 
@@ -55,7 +59,8 @@ export class DrawingAreaSvg {
         path.setAttribute('stroke-width', 1);
         path.setAttribute('fill-opacity', 0);
         path.setAttribute('class', 'link');
-        this.svg.appendChild(path);
+        this.elements.push(path);
+        return path;
     }
 
     drawBorders() {
@@ -70,13 +75,13 @@ export class DrawingAreaSvg {
         this.createCircle(x, y, 1, 'green');
     }
 
-    drawNodeRect(node) {
-        const rect = this.createRect(node.x, node.y, node.width, node.height, 'green');
-        rect.setAttribute('data-coords', `${node.colIndex}-${node.rowIndex}`);
+    nodeToCoordsString(n) {
+        return `(${n.colIndex},${n.rowIndex})`;
     }
 
-    n2s(n) {
-        return `(${n.colIndex}, ${n.rowIndex})`;
+    drawNodeRect(node) {
+        const rect = this.createRect(node.x, node.y, node.width, node.height, 'green');
+        rect.setAttribute('data-coords', this.nodeToCoordsString(node));
     }
 
     drawTopGoingAroundLink(n1, coveredNodes) {
@@ -249,21 +254,34 @@ export class DrawingAreaSvg {
         this.createLine(n.nwx, n.nwy, n.nwx, 0, leftLineColour, null, true);
     }
 
-    removeAllLinks() {
+    addCoveredNode(node) {
+        this.coveredNodes.push(node);
+    }
+
+    resetLinks() {
         const links = document.getElementsByClassName('link');
         Array.from(links).forEach(link => link.remove());
     }
 
-    resetAllNodes() {
+    resetCoveredNodes() {
         const elements = Array.from(document.querySelectorAll('[data-coords]'));
         elements.forEach(element => element.setAttribute('class', ''));
     }
 
-    setNodeCovered(node) {
-        const coords = `${node.colIndex}-${node.rowIndex}`;
-        const element = document.querySelector(`[data-coords='${coords}']`);
-        if (element) {
-            element.setAttribute('class', 'covered');
+    setCoveredNodes() {
+        this.coveredNodes.forEach(node => {
+            const coordsString = this.nodeToCoordsString(node);
+            const element = document.querySelector(`[data-coords='${coordsString}']`);
+            if (element) {
+                element.setAttribute('class', 'covered');
+            }
+        });
+    }
+
+    insertElementsIntoDOM() {
+        // this.elements.forEach(element => this.svg.appendChild(element));
+        for (let i = 0; i < this.elements.length; i++) {
+            this.svg.appendChild(this.elements[i]);
         }
     }
 }

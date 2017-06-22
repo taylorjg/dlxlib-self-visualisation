@@ -140,9 +140,6 @@ const getVerticalCoveredNodes = n => {
 
 const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 
-    drawingArea.removeAllLinks();
-    drawingArea.resetAllNodes();
-
     const { nodes } = rootToStructure(root);
 
     const drawHorizontalLinks = n1 => {
@@ -177,20 +174,19 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 
     const addCoveredNode = n => {
         allCoveredNodes.push(n);
+        drawingArea.addCoveredNode(n);
     };
 
     const blessCoveredNodesOf = n => {
         const coveredNodes = getVerticalCoveredNodes(n);
         coveredNodes.forEach(n2 => {
             bless(nodeWidth, nodeHeight)(n2);
-            drawingArea.setNodeCovered(n2);
             addCoveredNode(n2);
         });
     };
     const blessUncoveredNodesOf = n => {
         n.loopDown(n2 => {
             bless(nodeWidth, nodeHeight)(n2);
-            drawingArea.setNodeCovered(n2);
             addCoveredNode(n2);
         });
     };
@@ -202,7 +198,6 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
             blessUncoveredNodesOf(ch2);
             blessCoveredNodesOf(ch2);
             ch2.loopDown(blessCoveredNodesOf);
-            drawingArea.setNodeCovered(ch2);
             addCoveredNode(ch2);
         });
     };
@@ -224,8 +219,8 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
     });
 };
 
-const queue = [];
-const drawingArea = new DrawingAreaSvg('svg');
+const searchSteps = [];
+const svg = document.getElementById('svg');
 const preSubMatrix = document.getElementById('preSubMatrix');
 const prePartialSolution = document.getElementById('prePartialSolution');
 const btnStep = document.getElementById('btnStep');
@@ -249,41 +244,23 @@ const populateSubMatrix = root => {
         }
     });
     const s = ss.join('\n');
-    preSubMatrix.innerHTML = s;
+    return s;
 };
 
-const populatePartialSolution = rowIndices => {
-    const ss = [];
-    rowIndices.forEach(rowIndex => {
-        ss.push(`${rowIndex}: ${matrix[rowIndex].join(' ')}`);
-    });
-    const s = ss.join('\n');
-    prePartialSolution.innerHTML = s;
-};
+const populatePartialSolution = rowIndices =>
+    rowIndices
+        .map(rowIndex => `${rowIndex}: ${matrix[rowIndex].join(' ')}`)
+        .join(`\n`);
 
 const onStep = () => {
-    if (queue.length) {
-        const { index, nodeWidth, nodeHeight } = queue.shift();
-
-        // Ugly hack. Ideally, 'root' would be a persistent data structure.
-        // But it isn't. It is mutated as the algorithm progresses.
-        // Also, it is very difficult to clone 'root'. Therefore, we use a
-        // separate dlxlib instance to replay the algorithm up to the
-        // step that we are interested in. Yuck! We can get away with this
-        // for a small matrix. But it is still horrid! And fortunately, the
-        // algorithm is deterministic - otherwise we wouldn't be able to
-        // do it this way.
-        let secondInstanceStepCount = 0;
-        const onSecondInstanceSearchStep = (rowIndices, root) => {
-            if (secondInstanceStepCount === index) {
-                populateSubMatrix(root);
-                populatePartialSolution(rowIndices);
-                drawLinks(nodeWidth, nodeHeight, root, drawingArea);
-            }
-            secondInstanceStepCount++;
-        };
-        const secondInstance = solutionGenerator(matrix, onSecondInstanceSearchStep);
-        secondInstance.next();
+    if (searchSteps.length) {
+        const { drawingArea, subMatrixText, partialSolutionText } = searchSteps.shift();
+        drawingArea.resetLinks();
+        drawingArea.resetCoveredNodes();
+        drawingArea.insertElementsIntoDOM();
+        drawingArea.setCoveredNodes();
+        preSubMatrix.innerHTML = subMatrixText;
+        prePartialSolution.innerHTML = partialSolutionText;
     }
     else {
         btnStep.disabled = true;
@@ -293,20 +270,25 @@ const onStep = () => {
 btnStep.addEventListener('click', onStep);
 
 const onSearchStep = () => {
+
     let nodeWidth;
     let nodeHeight;
-    return (_, root) => {
-        const index = queue.length;
-        if (index === 0) {
+
+    return (rowIndices, root) => {
+
+        if (searchSteps.length === 0) {
+            const drawingArea = new DrawingAreaSvg(svg);
             const dimensions = drawInitialStructure(root, drawingArea);
+            drawingArea.insertElementsIntoDOM();
             nodeWidth = dimensions.nodeWidth;
             nodeHeight = dimensions.nodeHeight;
         }
-        queue.push({
-            index,
-            nodeWidth,
-            nodeHeight
-        });
+
+        const drawingArea = new DrawingAreaSvg(svg);
+        drawLinks(nodeWidth, nodeHeight, root, drawingArea);
+        const subMatrixText = populateSubMatrix(root);
+        const partialSolutionText = populatePartialSolution(rowIndices);
+        searchSteps.push({ drawingArea, subMatrixText, partialSolutionText });
     };
 };
 
