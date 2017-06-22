@@ -228,6 +228,7 @@ const btnFirstStep = document.getElementById('btnFirstStep');
 const btnStepBackwards = document.getElementById('btnStepBackwards');
 const btnStepForwards = document.getElementById('btnStepForwards');
 const btnLastStep = document.getElementById('btnLastStep');
+const lblSearchStep = document.getElementById('lblSearchStep');
 
 const populateSubMatrix = root => {
     const ss = [];
@@ -276,9 +277,12 @@ const onStep = index => {
         if (index < 0) index = 0;
         if (index > index.length - 1) index = index.length - 1;
         currentSearchStepIndex = index;
+        lblSearchStep.style.display = 'inline';
+        lblSearchStep.innerText = `(search step ${currentSearchStepIndex + 1} of ${searchSteps.length})`;
     }
     else {
         currentSearchStepIndex = -1;
+        lblSearchStep.style.display = 'none';
     }
 
     updateButtonState();
