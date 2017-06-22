@@ -19,6 +19,9 @@ const matrix = [
     [0, 0, 0, 1, 1, 0, 1]      
 ];
 
+const CODE_POINT_A = 'A'.codePointAt(0);
+const COLUMN_NAMES = matrix[0].map((_, index) => String.fromCodePoint(CODE_POINT_A + index));
+
 const rootToStructure = root => {
     const nodes = [];
     let maxRowIndex = 0;
@@ -149,39 +152,44 @@ const drawInitialStructure = (root, drawingArea) => {
 };
 
 const getHorizontalCoveredNodes = n => {
-    const xs = n.oldRights.slice().reverse();
-    return xs.length ? xs.concat(getHorizontalCoveredNodes(xs[xs.length - 1])) : xs;
+    const xs = n.oldRights;
+    const ys = xs.map(getHorizontalCoveredNodes);
+    return xs.concat(...ys).sort((a, b) => a.colIndex - b.colIndex);
 };
 
 const getVerticalCoveredNodes = n => {
-    const xs = n.oldDowns.slice().reverse();
-    return xs.length ? xs.concat(getVerticalCoveredNodes(xs[xs.length - 1])) : xs;
+    const xs = n.oldDowns;
+    const ys = xs.map(getVerticalCoveredNodes);
+    return xs.concat(...ys).sort((a, b) => a.rowIndex - b.rowIndex);
 };
 
 const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 
     drawingArea.removeAllLinks();
+    drawingArea.resetAllNodes();
 
     const { nodes } = rootToStructure(root);
 
     const drawHorizontalLinks = n1 => {
+        const coveredNodes = getHorizontalCoveredNodes(n1);
         const n2 = n1.right;
         if (n2.colIndex > n1.colIndex) {
-            drawingArea.drawHorizontalLinks(n1, n2);
+            drawingArea.drawHorizontalLinks(n1, n2, coveredNodes);
         }
         else {
-            drawingArea.drawHorizontalLinksToRightEdge(n1);
+            drawingArea.drawHorizontalLinksToRightEdge(n1, coveredNodes);
             drawingArea.drawHorizontalLinksFromLeftEdge(n2);
         }
     };
 
     const drawVerticalLinks = n1 => {
+        const coveredNodes = getVerticalCoveredNodes(n1);
         let n2 = n1.down;
         if (n2.rowIndex > n1.rowIndex) {
-            drawingArea.drawVerticalLinks(n1, n2);
+            drawingArea.drawVerticalLinks(n1, n2, coveredNodes);
         }
         else {
-            drawingArea.drawVerticalLinksToBottomEdge(n1);
+            drawingArea.drawVerticalLinksToBottomEdge(n1, coveredNodes);
             drawingArea.drawVerticalLinksFromTopEdge(n2);
         }
     };
@@ -193,23 +201,30 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
     const blessCoveredNodesOf = n => {
         const coveredNodes = getVerticalCoveredNodes(n);
         coveredNodes.forEach(n2 => {
-            console.log(`[blessCoveredNodesOf] n2.colIndex: ${n2.colIndex}; n2.rowIndex: ${n2.rowIndex}`);
             blessNode(nodeWidth, nodeHeight)(n2);
+            drawingArea.setNodeCovered(n2);
+        });
+    };
+    const blessUncoveredNodesOf = n => {
+        n.loopDown(n2 => {
+            blessNode(nodeWidth, nodeHeight)(n2);
+            drawingArea.setNodeCovered(n2);
         });
     };
     const blessCoveredColumnHeadersOf = ch => {
-        blessCoveredNodesOf(ch);
         ch.loopDown(blessCoveredNodesOf);
         const coveredNodes = getHorizontalCoveredNodes(ch);
         coveredNodes.forEach(ch2 => {
-            console.log(`[blessCoveredColumnHeadersOf] ch2.colIndex: ${ch2.colIndex}; ch2.rowIndex: ${ch2.rowIndex}`);
             blessColumnHeader(nodeWidth, nodeHeight)(ch2);
+            blessUncoveredNodesOf(ch2);
             blessCoveredNodesOf(ch2);
             ch2.loopDown(blessCoveredNodesOf);
+            drawingArea.setNodeCovered(ch2);
         });
     };
     blessCoveredColumnHeadersOf(root);
     root.loopRight(blessCoveredColumnHeadersOf);
+    root.loopRight(blessCoveredNodesOf);
 
     drawHorizontalLinks(root);
     root.loopRight(drawHorizontalLinks);
@@ -217,20 +232,27 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
     nodes.forEach(drawHorizontalLinks);
     nodes.forEach(drawVerticalLinks);
 
-    // const drawLinksForCoveredNodesOf = n => {
-    //     const coveredNodes = getVerticalCoveredNodes(n);
-    //     coveredNodes.forEach(drawHorizontalLinks);
-    //     coveredNodes.forEach(drawVerticalLinks);
-    // };
-    // const drawLinksForCoveredColumnHeadersOf = ch => {
-    //     const coveredNodes = getHorizontalCoveredNodes(ch);
-    //     coveredNodes.forEach(ch2 => {
-    //         drawLinksForCoveredNodesOf(ch2);
-    //         ch2.loopDown(drawLinksForCoveredNodesOf);
-    //     });
-    // };
-    // drawLinksForCoveredColumnHeadersOf(root);
-    // root.loopRight(drawLinksForCoveredColumnHeadersOf);
+    const drawLinksForCoveredNodesOf = n => {
+        const coveredNodes = getVerticalCoveredNodes(n);
+        coveredNodes.forEach(drawHorizontalLinks);
+        coveredNodes.forEach(drawVerticalLinks);
+    };
+    const drawLinksForUncoveredNodesOf = n => {
+        n.loopDown(n2 => {
+            drawHorizontalLinks(n2);
+            drawVerticalLinks(n2);
+        });
+    };
+    const drawLinksForCoveredColumnHeadersOf = ch => {
+        const coveredNodes = getHorizontalCoveredNodes(ch);
+        coveredNodes.forEach(ch2 => {
+            drawLinksForUncoveredNodesOf(ch2);
+            drawLinksForCoveredNodesOf(ch2);
+            ch2.loopDown(drawLinksForCoveredNodesOf);
+        });
+    };
+    drawLinksForCoveredColumnHeadersOf(root);
+    root.loopRight(drawLinksForCoveredColumnHeadersOf);
 };
 
 const queue = [];
@@ -238,11 +260,9 @@ const drawingArea = new DrawingAreaSvg('svg');
 const preSubMatrix = document.getElementById('preSubMatrix');
 const prePartialSolution = document.getElementById('prePartialSolution');
 const btnStep = document.getElementById('btnStep');
+
 let nodeWidth = undefined;
 let nodeHeight = undefined;
-
-const A = 'A'.codePointAt(0);
-const COLUMN_NAMES = matrix[0].map((_, index) => String.fromCodePoint(A + index));
 
 const populateSubMatrix = root => {
     const ss = [];

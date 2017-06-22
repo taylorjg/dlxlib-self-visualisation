@@ -1,6 +1,6 @@
 {
   "name": "dlxlib-self-visualisation",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Visualisation of the manipulation of the internal links of dlxlib as the algorithm progresses",
   "scripts": {
     "start": "node server/app.js",

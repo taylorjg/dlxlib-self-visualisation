@@ -45,6 +45,7 @@ export class DrawingAreaSvg {
         rect.setAttribute('stroke', colour);
         rect.setAttribute('fill-opacity', 0);
         this.svg.appendChild(rect);
+        return rect;
     }
 
     createPath(data, colour) {
@@ -70,17 +71,8 @@ export class DrawingAreaSvg {
     }
 
     drawNodeRect(node) {
-        this.createRect(node.x, node.y, node.width, node.height, 'green');
-    }
-
-    getHorizontalCoveredNodes(n) {
-        const xs = n.oldRights.slice().reverse();
-        return xs.length ? xs.concat(this.getHorizontalCoveredNodes(xs[xs.length - 1])) : xs;
-    }
-
-    getVerticalCoveredNodes(n) {
-        const xs = n.oldDowns.slice().reverse();
-        return xs.length ? xs.concat(this.getVerticalCoveredNodes(xs[xs.length - 1])) : xs;
+        const rect = this.createRect(node.x, node.y, node.width, node.height, 'green');
+        rect.setAttribute('data-coords', `${node.colIndex}-${node.rowIndex}`);
     }
 
     n2s(n) {
@@ -211,8 +203,7 @@ export class DrawingAreaSvg {
         this.drawLeftGoingRoundLink(n2, coveredNodes);
     }
 
-    drawHorizontalLinks(n1, n2) {
-        const coveredNodes = this.getHorizontalCoveredNodes(n1);
+    drawHorizontalLinks(n1, n2, coveredNodes) {
         if (coveredNodes.length) {
             console.log(`[drawHorizontalLinks] n1: ${this.n2s(n1)}; n2: ${this.n2s(n2)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
             this.drawHorizontalGoingAroundLinks(n1, n2, coveredNodes);
@@ -221,8 +212,7 @@ export class DrawingAreaSvg {
         this.createLine(n2.swx, n2.swy, n1.x + n1.width, n2.swy, 'green', null, true);
     }
 
-    drawHorizontalLinksToRightEdge(n) {
-        const coveredNodes = this.getHorizontalCoveredNodes(n);
+    drawHorizontalLinksToRightEdge(n, coveredNodes) {
         if (coveredNodes.length) {
             console.log(`[drawHorizontalLinksToRightEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
             this.drawHorizontalGoingAroundLinks(n, { swx: this.width, swy: n.swy }, coveredNodes);
@@ -238,8 +228,7 @@ export class DrawingAreaSvg {
         this.createLine(n.swx, n.swy, 0, n.swy, bottomLineColour, null, true);
     }
 
-    drawVerticalLinks(n1, n2) {
-        const coveredNodes = this.getVerticalCoveredNodes(n1);
+    drawVerticalLinks(n1, n2, coveredNodes) {
         if (coveredNodes.length) {
             console.log(`[drawVerticalLinks] n1: ${this.n2s(n1)}; n2: ${this.n2s(n2)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
             this.drawVerticalGoingAroundLinks(n1, n2, coveredNodes);
@@ -248,8 +237,7 @@ export class DrawingAreaSvg {
         this.createLine(n2.nwx, n2.nwy, n2.nwx, n1.y + n1.height, 'green', null, true);
     }
 
-    drawVerticalLinksToBottomEdge(n) {
-        const coveredNodes = this.getVerticalCoveredNodes(n);
+    drawVerticalLinksToBottomEdge(n, coveredNodes) {
         if (coveredNodes.length) {
             console.log(`[drawVerticalLinksToBottomEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
             this.drawVerticalGoingAroundLinks(n, { nwx: n.nwx, nwy: this.height }, coveredNodes);
@@ -268,5 +256,18 @@ export class DrawingAreaSvg {
     removeAllLinks() {
         const links = document.getElementsByClassName('link');
         Array.from(links).forEach(link => link.remove());
+    }
+
+    resetAllNodes() {
+        const elements = Array.from(document.querySelectorAll('[data-coords]'));
+        elements.forEach(element => element.setAttribute('class', ''));
+    }
+
+    setNodeCovered(node) {
+        const coords = `${node.colIndex}-${node.rowIndex}`;
+        const element = document.querySelector(`[data-coords='${coords}']`);
+        if (element) {
+            element.setAttribute('class', 'covered');
+        }
     }
 }

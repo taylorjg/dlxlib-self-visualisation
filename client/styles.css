@@ -24,3 +24,7 @@ button {
 #version {
     font-style: italic;
 }
+
+.covered {
+    stroke: yellow;
+}
