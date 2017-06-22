@@ -20,3 +20,7 @@ button {
 #tables {
     display: inline-block;
 }
+
+#version {
+    font-style: italic;
+}

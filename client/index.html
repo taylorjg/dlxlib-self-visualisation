@@ -8,27 +8,27 @@
 </head>
 
 <body>
-    <svg id="svg" width="400" height="400"></svg>
-    <div id="tables">
-        <h2>Current Sub-Matrix</h2>
-        <pre id="preSubMatrix">
-A B C D E F G
-0 0 1 0 1 1 0
-1 0 0 1 0 0 1
-0 1 1 0 0 1 0
-1 0 0 1 0 0 0
-0 1 0 0 0 0 1
-0 0 0 1 1 0 1
+    <div class="container">
+        <div class="row">
+            <span class="pull-right">version: <%= htmlWebpackPlugin.options.version %></span>
+        </div>
+        <div class="row">
+            <hr />
+        </div>
+        <div class="row">
+            <svg id="svg" width="400" height="400"></svg>
+            <div id="tables">
+                <h2>Current Sub-Matrix</h2>
+                <pre id="preSubMatrix">
         </pre>
-        <h2>Current Parial Solution</h2>
-        <pre id="prePartialSolution">
-0: 0 0 1 0 1 1 0
-3: 1 0 0 1 0 0 0
-4: 0 1 0 0 0 0 1
+                <h2>Current Parial Solution</h2>
+                <pre id="prePartialSolution">
         </pre>
-    </div>
-    <div>
-        <button id="btnStep" class="btn btn-sm btn-primary">Step</button>
+            </div>
+            <div>
+                <button id="btnStep" class="btn btn-sm btn-primary">Step</button>
+            </div>
+        </div>
     </div>
 </body>
 
