@@ -7,7 +7,7 @@ const matrix = [
     [0, 1, 1, 0, 0, 1, 0],
     [1, 0, 0, 1, 0, 0, 0],
     [0, 1, 0, 0, 0, 0, 1],
-    [0, 0, 0, 1, 1, 0, 1]      
+    [0, 0, 0, 1, 1, 0, 1]
 ];
 
 const CODE_POINT_A = 'A'.codePointAt(0);
@@ -230,9 +230,6 @@ const preSubMatrix = document.getElementById('preSubMatrix');
 const prePartialSolution = document.getElementById('prePartialSolution');
 const btnStep = document.getElementById('btnStep');
 
-let nodeWidth = undefined;
-let nodeHeight = undefined;
-
 const populateSubMatrix = root => {
     const ss = [];
     const columnsPresent = [];
@@ -266,7 +263,7 @@ const populatePartialSolution = rowIndices => {
 
 const onStep = () => {
     if (queue.length) {
-        const { index } = queue.shift();
+        const { index, nodeWidth, nodeHeight } = queue.shift();
 
         // Ugly hack. Ideally, 'root' would be a persistent data structure.
         // But it isn't. It is mutated as the algorithm progresses.
@@ -295,18 +292,25 @@ const onStep = () => {
 
 btnStep.addEventListener('click', onStep);
 
-const onSearchStep = (_, root) => {
-    const index = queue.length;
-    console.log(`[onSearchStep] index: ${index}`);
-    if (index === 0) {
-        const dimensions = drawInitialStructure(root, drawingArea);
-        nodeWidth = dimensions.nodeWidth;
-        nodeHeight = dimensions.nodeHeight;
-    }
-    queue.push({ index });
+const onSearchStep = () => {
+    let nodeWidth;
+    let nodeHeight;
+    return (_, root) => {
+        const index = queue.length;
+        if (index === 0) {
+            const dimensions = drawInitialStructure(root, drawingArea);
+            nodeWidth = dimensions.nodeWidth;
+            nodeHeight = dimensions.nodeHeight;
+        }
+        queue.push({
+            index,
+            nodeWidth,
+            nodeHeight
+        });
+    };
 };
 
-const generator = solutionGenerator(matrix, onSearchStep);
+const generator = solutionGenerator(matrix, onSearchStep());
 const iteratorObject = generator.next();
 if (!iteratorObject.done) {
     const solution = iteratorObject.value;

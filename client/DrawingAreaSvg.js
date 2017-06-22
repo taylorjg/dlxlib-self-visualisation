@@ -205,7 +205,6 @@ export class DrawingAreaSvg {
 
     drawHorizontalLinks(n1, n2, coveredNodes) {
         if (coveredNodes.length) {
-            console.log(`[drawHorizontalLinks] n1: ${this.n2s(n1)}; n2: ${this.n2s(n2)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
             this.drawHorizontalGoingAroundLinks(n1, n2, coveredNodes);
         }
         this.createLine(n1.nex, n1.ney, n2.x, n1.ney, 'green', null, true);
@@ -214,7 +213,6 @@ export class DrawingAreaSvg {
 
     drawHorizontalLinksToRightEdge(n, coveredNodes) {
         if (coveredNodes.length) {
-            console.log(`[drawHorizontalLinksToRightEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
             this.drawHorizontalGoingAroundLinks(n, { swx: this.width, swy: n.swy }, coveredNodes);
         }
         this.createLine(n.nex, n.ney, this.width, n.ney, 'green', null, true);
@@ -230,7 +228,6 @@ export class DrawingAreaSvg {
 
     drawVerticalLinks(n1, n2, coveredNodes) {
         if (coveredNodes.length) {
-            console.log(`[drawVerticalLinks] n1: ${this.n2s(n1)}; n2: ${this.n2s(n2)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
             this.drawVerticalGoingAroundLinks(n1, n2, coveredNodes);
         }
         this.createLine(n1.sex, n1.sey, n1.sex, n2.y, 'green', null, true);
@@ -239,7 +236,6 @@ export class DrawingAreaSvg {
 
     drawVerticalLinksToBottomEdge(n, coveredNodes) {
         if (coveredNodes.length) {
-            console.log(`[drawVerticalLinksToBottomEdge] n1: ${this.n2s(n)}; coveredNodes: ${coveredNodes.map(this.n2s).join(', ')}`);
             this.drawVerticalGoingAroundLinks(n, { nwx: n.nwx, nwy: this.height }, coveredNodes);
         }
         this.createLine(n.sex, n.sey, n.sex, this.height, 'green', null, true);
