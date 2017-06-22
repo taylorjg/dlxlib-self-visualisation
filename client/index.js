@@ -220,10 +220,14 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 };
 
 const searchSteps = [];
+let currentSearchStepIndex;
 const svg = document.getElementById('svg');
 const preSubMatrix = document.getElementById('preSubMatrix');
 const prePartialSolution = document.getElementById('prePartialSolution');
-const btnStep = document.getElementById('btnStep');
+const btnFirstStep = document.getElementById('btnFirstStep');
+const btnStepBackwards = document.getElementById('btnStepBackwards');
+const btnStepForwards = document.getElementById('btnStepForwards');
+const btnLastStep = document.getElementById('btnLastStep');
 
 const populateSubMatrix = root => {
     const ss = [];
@@ -252,9 +256,35 @@ const populatePartialSolution = rowIndices =>
         .map(rowIndex => `${rowIndex}: ${matrix[rowIndex].join(' ')}`)
         .join(`\n`);
 
-const onStep = () => {
+const updateButtonState = () => {
+    if (searchSteps.length === 0) {
+        btnFirstStep.disabled = true;
+        btnStepBackwards.disabled = true;
+        btnStepForwards.disabled = true;
+        btnLastStep.disabled = true;
+    }
+    else {
+        btnFirstStep.disabled = currentSearchStepIndex <= 0;
+        btnStepBackwards.disabled = currentSearchStepIndex <= 0;
+        btnStepForwards.disabled = currentSearchStepIndex >= searchSteps.length - 1;
+        btnLastStep.disabled = currentSearchStepIndex >= searchSteps.length - 1;
+    }
+};
+
+const onStep = index => {
     if (searchSteps.length) {
-        const { drawingArea, subMatrixText, partialSolutionText } = searchSteps.shift();
+        if (index < 0) index = 0;
+        if (index > index.length - 1) index = index.length - 1;
+        currentSearchStepIndex = index;
+    }
+    else {
+        currentSearchStepIndex = -1;
+    }
+
+    updateButtonState();
+
+    if (searchSteps.length) {
+        const { drawingArea, subMatrixText, partialSolutionText } = searchSteps[currentSearchStepIndex];
         drawingArea.resetLinks();
         drawingArea.resetCoveredNodes();
         drawingArea.insertElementsIntoDOM();
@@ -262,12 +292,12 @@ const onStep = () => {
         preSubMatrix.innerHTML = subMatrixText;
         prePartialSolution.innerHTML = partialSolutionText;
     }
-    else {
-        btnStep.disabled = true;
-    }
 };
 
-btnStep.addEventListener('click', onStep);
+btnFirstStep.addEventListener('click', () => onStep(0));
+btnStepBackwards.addEventListener('click', () => onStep(currentSearchStepIndex - 1));
+btnStepForwards.addEventListener('click', () => onStep(currentSearchStepIndex + 1));
+btnLastStep.addEventListener('click', () => onStep(searchSteps.length - 1));
 
 const onSearchStep = () => {
 
@@ -298,4 +328,4 @@ if (!iteratorObject.done) {
     const solution = iteratorObject.value;
     console.log(`solution: ${JSON.stringify(solution)}`);
 }
-onStep();
+onStep(0);
