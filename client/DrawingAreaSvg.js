@@ -137,25 +137,25 @@ export class DrawingAreaSvg {
         this.createPath(data, 'red');
     }
 
-    drawRightGoingAroundLink(n1, coveredNodes) {
+    drawRightGoingAroundLink(n1, n2, tweeners) {
 
-        const firstCoveredNode = coveredNodes[0];
-        const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
-        const displacement = (firstCoveredNode.nex - firstCoveredNode.nwx) * 1.2;
+        const firstTweener = tweeners[0];
+        const lastTweener = tweeners[tweeners.length - 1];
+        const displacement = (n1.nex - n2.nwx) * 1.2;
 
-        const a1 = firstCoveredNode.nex;
-        const b1 = firstCoveredNode.ney - firstCoveredNode.width;
+        const a1 = firstTweener.nex; // firstCoveredNode.nex;
+        const b1 = firstTweener.ney - firstTweener.width; // firstCoveredNode.ney - firstCoveredNode.width;
         const g1 = a1 + displacement;
-        const h1 = firstCoveredNode.ney;
+        const h1 = firstTweener.ney; // firstCoveredNode.ney;
         const e1 = (a1 + g1) / 2;
         const f1 = (b1 + h1) / 2;
         const c1 = a1;
         const d1 = f1;
 
         const a2 = g1;
-        const b2 = lastCoveredNode.sey;
+        const b2 = lastTweener.sey; // lastCoveredNode.sey;
         const g2 = a1;
-        const h2 = lastCoveredNode.sey + lastCoveredNode.width;
+        const h2 = lastTweener.sey + lastTweener.width; // lastCoveredNode.sey + lastCoveredNode.width;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
         const c2 = a2;
@@ -166,31 +166,31 @@ export class DrawingAreaSvg {
     }
 
     // TODO: looks like we should "come in" after each covered node (see figure 4, column D).
-    drawLeftGoingRoundLink(n2, coveredNodes) {
+    drawLeftGoingRoundLink(n1, n2, tweeners) {
 
-        const firstCoveredNode = coveredNodes[0];
-        const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
-        const displacement = (firstCoveredNode.nex - firstCoveredNode.nwx) * 1.2;
+        const firstTweener = tweeners[0];
+        const lastTweener = tweeners[tweeners.length - 1];
+        const displacement = (n1.nex - n1.nwx) * 1.2;
 
-        const a1 = lastCoveredNode.swx;
-        const b1 = lastCoveredNode.swy + lastCoveredNode.width;
+        const a1 = lastTweener.swx;
+        const b1 = lastTweener.swy + lastTweener.width;
         const g1 = a1 - displacement;
-        const h1 = lastCoveredNode.swy;
+        const h1 = lastTweener.swy;
         const e1 = (a1 + g1) / 2;
         const f1 = (b1 + h1) / 2;
         const c1 = a1;
         const d1 = f1;
         
         const a2 = g1;
-        const b2 = firstCoveredNode.nwy;
+        const b2 = firstTweener.nwy;
         const g2 = a1;
-        const h2 = b2 - firstCoveredNode.width;
+        const h2 = b2 - firstTweener.width;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
         const c2 = a2;
         const d2 = f2;
 
-        const data = `M${n2.nwx} ${n2.nwy} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
+        const data = `M${n1.nwx} ${n1.nwy} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
         this.createPath(data, 'red');
     }
 
@@ -252,9 +252,9 @@ export class DrawingAreaSvg {
         }
     }
 
-    drawGoingAroundDownLink(n1, n2, coveredNodes) {
+    drawGoingAroundDownLink(n1, n2, tweeners) {
         if (n2.rowIndex > n1.rowIndex) {
-            this.drawRightGoingAroundLink(n1, coveredNodes);
+            this.drawRightGoingAroundLink(n1, n2, tweeners);
         }
         else {
             // TODO
@@ -271,9 +271,10 @@ export class DrawingAreaSvg {
         }
     }
 
-    drawGoingAroundUpLink(n1, n2, coveredNodes) {
+    drawGoingAroundUpLink(n1, n2, tweeners) {
+        tweeners;
         if (n1.rowIndex > n2.rowIndex) {
-            this.drawLeftGoingRoundLink(n1, coveredNodes);
+            this.drawLeftGoingRoundLink(n1, n2, tweeners);
         }
         else {
             // TODO
