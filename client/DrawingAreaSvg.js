@@ -218,7 +218,14 @@ export class DrawingAreaSvg {
         }
     }
 
-    drawGoingAroundRightLink(/*n1, n2*/) {
+    drawGoingAroundRightLink(n1, n2, coveredNodes) {
+        if (n2.colIndex > n1.colIndex) {
+            this.drawTopGoingAroundLink(n1, coveredNodes);
+            // this.drawGoingAroundRightLinkHelper(n1, coveredNodes);
+        }
+        else {
+            // this.drawGoingAroundRightLinkHelper(n1, ???);
+        }
     }
 
     drawNormalLeftLink(n1, n2) {
@@ -231,7 +238,14 @@ export class DrawingAreaSvg {
         }
     }
 
-    drawGoingAroundLeftLink(/*n1, n2*/) {
+    drawGoingAroundLeftLink(n1, n2, coveredNodes) {
+        if (n1.colIndex > n2.colIndex) {
+            this.drawBottomGoingRoundLink(n1, coveredNodes);
+            // this.drawGoingAroundLeftLinkHelper(n1, coveredNodes);
+        }
+        else {
+            // this.drawGoingAroundLeftLinkHelper(n1, ???);
+        }
     }
 
     drawNormalDownLink(n1, n2) {
@@ -244,7 +258,13 @@ export class DrawingAreaSvg {
         }
     }
 
-    drawGoingAroundDownLink(/*n1, n2*/) {
+    drawGoingAroundDownLink(n1, n2, coveredNodes) {
+        if (n2.rowIndex > n1.rowIndex) {
+            this.drawRightGoingAroundLink(n1, coveredNodes);
+        }
+        else {
+            // TODO
+        }
     }
 
     drawNormalUpLink(n1, n2) {
@@ -257,60 +277,66 @@ export class DrawingAreaSvg {
         }
     }
 
-    drawGoingAroundUpLink(/*n1, n2*/) {
+    drawGoingAroundUpLink(n1, n2, coveredNodes) {
+        if (n1.rowIndex > n2.rowIndex) {
+            this.drawLeftGoingRoundLink(n1, coveredNodes);
+        }
+        else {
+            // TODO
+        }
     }
 
     /* ---------- OLD STUFF ---------- */
 
-    drawHorizontalLinks(n1, n2, coveredNodes) {
-        if (coveredNodes.length) {
-            this.drawHorizontalGoingAroundLinks(n1, n2, coveredNodes);
-        }
-        this.createLine(n1.nex, n1.ney, n2.x, n1.ney, 'green', null, true);
-        this.createLine(n2.swx, n2.swy, n1.x + n1.width, n2.swy, 'green', null, true);
-    }
+    // drawHorizontalLinks(n1, n2, coveredNodes) {
+    //     if (coveredNodes.length) {
+    //         this.drawHorizontalGoingAroundLinks(n1, n2, coveredNodes);
+    //     }
+    //     this.createLine(n1.nex, n1.ney, n2.x, n1.ney, 'green', null, true);
+    //     this.createLine(n2.swx, n2.swy, n1.x + n1.width, n2.swy, 'green', null, true);
+    // }
 
-    drawHorizontalLinksToRightEdge(n, coveredNodes) {
-        if (coveredNodes.length) {
-            this.drawHorizontalGoingAroundLinks(n, { swx: this.width, swy: n.swy }, coveredNodes);
-        }
-        this.createLine(n.nex, n.ney, this.width, n.ney, 'green', null, true);
-        this.createLine(this.width, n.swy, n.x + n.width, n.swy, 'green', null, true);
-    }
+    // drawHorizontalLinksToRightEdge(n, coveredNodes) {
+    //     if (coveredNodes.length) {
+    //         this.drawHorizontalGoingAroundLinks(n, { swx: this.width, swy: n.swy }, coveredNodes);
+    //     }
+    //     this.createLine(n.nex, n.ney, this.width, n.ney, 'green', null, true);
+    //     this.createLine(this.width, n.swy, n.x + n.width, n.swy, 'green', null, true);
+    // }
 
-    drawHorizontalLinksFromLeftEdge(n) {
-        const lastColCovered = !!n.left.oldRights.length;
-        const bottomLineColour = lastColCovered ? 'red' : 'green';
-        this.createLine(0, n.nwy, n.x, n.nwy, 'green', null, true);
-        this.createLine(n.swx, n.swy, 0, n.swy, bottomLineColour, null, true);
-    }
+    // drawHorizontalLinksFromLeftEdge(n) {
+    //     const lastColCovered = !!n.left.oldRights.length;
+    //     const bottomLineColour = lastColCovered ? 'red' : 'green';
+    //     this.createLine(0, n.nwy, n.x, n.nwy, 'green', null, true);
+    //     this.createLine(n.swx, n.swy, 0, n.swy, bottomLineColour, null, true);
+    // }
 
-    drawVerticalLinks(n1, n2, coveredNodes) {
-        if (coveredNodes.length) {
-            this.drawVerticalGoingAroundLinks(n1, n2, coveredNodes);
-        }
-        this.createLine(n1.sex, n1.sey, n1.sex, n2.y, 'green', null, true);
-        this.createLine(n2.nwx, n2.nwy, n2.nwx, n1.y + n1.height, 'green', null, true);
-    }
+    // drawVerticalLinks(n1, n2, coveredNodes) {
+    //     if (coveredNodes.length) {
+    //         this.drawVerticalGoingAroundLinks(n1, n2, coveredNodes);
+    //     }
+    //     this.createLine(n1.sex, n1.sey, n1.sex, n2.y, 'green', null, true);
+    //     this.createLine(n2.nwx, n2.nwy, n2.nwx, n1.y + n1.height, 'green', null, true);
+    // }
 
-    drawVerticalLinksToBottomEdge(n, coveredNodes) {
-        if (coveredNodes.length) {
-            this.drawVerticalGoingAroundLinks(n, { nwx: n.nwx, nwy: this.height }, coveredNodes);
-        }
-    }
+    // drawVerticalLinksToBottomEdge(n, coveredNodes) {
+    //     if (coveredNodes.length) {
+    //         this.drawVerticalGoingAroundLinks(n, { nwx: n.nwx, nwy: this.height }, coveredNodes);
+    //     }
+    // }
 
-    drawVerticalLinksFromTopEdge(n) {
-        const lastRowCovered = !!n.up.oldDowns.length;
-        const leftLineColour = lastRowCovered ? 'red' : 'green';
-        this.createLine(n.nex, 0, n.nex, n.y, 'green', null, true);
-        this.createLine(n.nwx, n.nwy, n.nwx, 0, leftLineColour, null, true);
-    }
+    // drawVerticalLinksFromTopEdge(n) {
+    //     const lastRowCovered = !!n.up.oldDowns.length;
+    //     const leftLineColour = lastRowCovered ? 'red' : 'green';
+    //     this.createLine(n.nex, 0, n.nex, n.y, 'green', null, true);
+    //     this.createLine(n.nwx, n.nwy, n.nwx, 0, leftLineColour, null, true);
+    // }
 
     addCoveredNode(node) {
         this.coveredNodes.push(node);
     }
 
-    resetLinks() {
+    removeLinks() {
         const links = document.getElementsByClassName('link');
         Array.from(links).forEach(link => link.remove());
     }
@@ -331,9 +357,6 @@ export class DrawingAreaSvg {
     }
 
     insertElementsIntoDOM() {
-        // this.elements.forEach(element => this.svg.appendChild(element));
-        for (let i = 0; i < this.elements.length; i++) {
-            this.svg.appendChild(this.elements[i]);
-        }
+        this.elements.forEach(element => this.svg.appendChild(element));
     }
 }

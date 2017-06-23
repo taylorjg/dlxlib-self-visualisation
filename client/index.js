@@ -106,17 +106,17 @@ const drawInitialStructure = (allNodes, drawingArea) => {
     allNodes.forEach(drawNode);
 };
 
-// const getHorizontalCoveredNodes = n => {
-//     const xs = n.oldRights;
-//     const ys = xs.map(getHorizontalCoveredNodes);
-//     return xs.concat(...ys).sort((a, b) => a.colIndex - b.colIndex);
-// };
+const getHorizontalCoveredNodes = n => {
+    const xs = n.oldRights;
+    const ys = xs.map(getHorizontalCoveredNodes);
+    return xs.concat(...ys).sort((a, b) => a.colIndex - b.colIndex);
+};
 
-// const getVerticalCoveredNodes = n => {
-//     const xs = n.oldDowns;
-//     const ys = xs.map(getVerticalCoveredNodes);
-//     return xs.concat(...ys).sort((a, b) => a.rowIndex - b.rowIndex);
-// };
+const getVerticalCoveredNodes = n => {
+    const xs = n.oldDowns;
+    const ys = xs.map(getVerticalCoveredNodes);
+    return xs.concat(...ys).sort((a, b) => a.rowIndex - b.rowIndex);
+};
 
 // const findCoveredNodes = root => {
 
@@ -216,6 +216,8 @@ const isUpAdjacent = (allNodes, n1, n2) => {
     return !range.some(rowIndex => !!findNode(allNodes, colIndex, rowIndex));
 };
 
+const n2s = n => `(${n.colIndex}, ${n.rowIndex})`;
+
 const drawLinks = (allNodes, drawingArea) => {
 
     const drawHorizontalLinks = n => {
@@ -225,7 +227,9 @@ const drawLinks = (allNodes, drawingArea) => {
             drawingArea.drawNormalRightLink(n, right);
         }
         else {
-            drawingArea.drawGoingAroundRightLink(n, right);
+            const coveredNodes = getHorizontalCoveredNodes(n);
+            console.log(`[right going around] n: ${n2s(n)}; right: ${n2s(right)}; coveredNodes: ${coveredNodes.map(n2s).join(', ')}`);
+            drawingArea.drawGoingAroundRightLink(n, right, coveredNodes);
         }
 
         const left = n.left;
@@ -233,7 +237,9 @@ const drawLinks = (allNodes, drawingArea) => {
             drawingArea.drawNormalLeftLink(n, left);
         }
         else {
-            drawingArea.drawGoingAroundLeftLink(n, left);
+            const coveredNodes = getHorizontalCoveredNodes(left).filter(cn => cn.colIndex !== n.colIndex);
+            console.log(`[left going around] n: ${n2s(n)}; left: ${n2s(left)}; coveredNodes: ${coveredNodes.map(n2s).join(', ')}`);
+            drawingArea.drawGoingAroundLeftLink(n, left, coveredNodes);
         }
     };
 
@@ -246,7 +252,9 @@ const drawLinks = (allNodes, drawingArea) => {
             drawingArea.drawNormalDownLink(n, down);
         }
         else {
-            drawingArea.drawGoingAroundDownLink(n, down);
+            const coveredNodes = getVerticalCoveredNodes(n);
+            console.log(`[down going around] n: ${n2s(n)}; down: ${n2s(down)}; coveredNodes: ${coveredNodes.map(n2s).join(', ')}`);
+            drawingArea.drawGoingAroundDownLink(n, down, coveredNodes);
         }
 
         const up = n.up;
@@ -254,7 +262,9 @@ const drawLinks = (allNodes, drawingArea) => {
             drawingArea.drawNormalUpLink(n, up);
         }
         else {
-            drawingArea.drawGoingAroundUpLink(n, up);
+            const coveredNodes = getVerticalCoveredNodes(up).filter(cn => cn.rowIndex !== n.rowIndex);
+            console.log(`[up going around] n: ${n2s(n)}; up: ${n2s(up)}; coveredNodes: ${coveredNodes.map(n2s).join(', ')}`);
+            drawingArea.drawGoingAroundUpLink(n, up, coveredNodes);
         }
     };
 
@@ -333,7 +343,7 @@ const onStep = index => {
 
     if (searchSteps.length) {
         const { drawingArea, subMatrixText, partialSolutionText } = searchSteps[currentSearchStepIndex];
-        drawingArea.resetLinks();
+        drawingArea.removeLinks();
         drawingArea.resetCoveredNodes();
         drawingArea.insertElementsIntoDOM();
         drawingArea.setCoveredNodes();
@@ -365,6 +375,7 @@ const onSearchStep = () => {
         }
 
         const drawingArea = new DrawingAreaSvg(svg);
+        console.log(`[onSearchStep]`);
         drawLinks(allNodes, drawingArea);
         const subMatrixText = populateSubMatrix(root);
         const partialSolutionText = populatePartialSolution(rowIndices);
