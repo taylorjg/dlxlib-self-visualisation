@@ -1,4 +1,4 @@
-import { solutionGenerator } from '../dlxlib';
+import { solve } from '../dlxlib';
 import { DrawingAreaSvg } from './DrawingAreaSvg';
 
 const matrix = [
@@ -25,6 +25,9 @@ const findAllNodes = root => {
 
     return nodes;
 };
+
+const findNode = (allNodes, colIndex, rowIndex) =>
+    allNodes.find(n => n.colIndex === colIndex && n.rowIndex === rowIndex);
 
 const calcNumColsAndRows = allNodes => {
     const maxColIndex = allNodes.reduce((acc, n) => Math.max(acc, n.colIndex), 0);
@@ -85,11 +88,10 @@ const bless = (nodeWidth, nodeHeight) => node => {
     node.sey = node.y + node.height - inset;
 };
 
-const drawInitialStructure = (root, allNodes, drawingArea) => {
+const drawInitialStructure = (allNodes, drawingArea) => {
 
-    const { numCols, numRows } = calcNumColsAndRows(allNodes);
-    const nodeWidth = drawingArea.width / (numCols + 1);
-    const nodeHeight = drawingArea.height / (numRows + 2);
+    const nodeWidth = drawingArea.width / (allNodes.numCols + 1);
+    const nodeHeight = drawingArea.height / (allNodes.numRows + 2);
 
     const drawNode = node => {
         drawingArea.drawNodeRect(node);
@@ -151,9 +153,6 @@ const drawInitialStructure = (root, allNodes, drawingArea) => {
 //     return allCoveredNodes;
 // };
 
-const findNode = (allNodes, colIndex, rowIndex) =>
-    allNodes.find(n => n.colIndex === colIndex && n.rowIndex === rowIndex);
-
 const makeRange1 = (l, h) => {
     return Array.from(Array(h - l - 1).keys()).map(x => x + l + 1);
 };
@@ -165,66 +164,64 @@ const makeRange2 = (l, h, numRowsOrCols, includeMinus1) => {
     return v4;
 };
 
-const isRightAdjacent = (allNodes, numCols, n1, n2) => {
+const isRightAdjacent = (allNodes,  n1, n2) => {
 
-    if ((Math.abs(n1.colIndex - n2.colIndex)) % numCols === 1) return true;
+    if ((Math.abs(n1.colIndex - n2.colIndex)) % allNodes.numCols === 1) return true;
 
     const rowIndex = n1.rowIndex;
 
     const range = (n2.colIndex > n1.colIndex)
         ? makeRange1(n1.colIndex, n2.colIndex)
-        : makeRange2(n2.colIndex, n1.colIndex, numCols, rowIndex === -1);
+        : makeRange2(n2.colIndex, n1.colIndex, allNodes.numCols, rowIndex === -1);
 
     return !range.some(colIndex => !!findNode(allNodes, colIndex, rowIndex));
 };
 
-const isLeftAdjacent = (allNodes, numCols, n1, n2) => {
+const isLeftAdjacent = (allNodes, n1, n2) => {
 
-    if ((Math.abs(n1.colIndex - n2.colIndex)) % numCols === 1) return true;
+    if ((Math.abs(n1.colIndex - n2.colIndex)) % allNodes.numCols === 1) return true;
 
     const rowIndex = n1.rowIndex;
 
     const range = (n1.colIndex > n2.colIndex)
         ? makeRange1(n2.colIndex, n1.colIndex)
-        : makeRange2(n1.colIndex, n2.colIndex, numCols, rowIndex === -1);
+        : makeRange2(n1.colIndex, n2.colIndex, allNodes.numCols, rowIndex === -1);
 
     return !range.some(colIndex => !!findNode(allNodes, colIndex, rowIndex));
 };
 
-const isDownAdjacent = (allNodes, numRows, n1, n2) => {
+const isDownAdjacent = (allNodes, n1, n2) => {
 
-    if ((Math.abs(n1.rowIndex - n2.rowIndex)) % numRows === 1) return true;
+    if ((Math.abs(n1.rowIndex - n2.rowIndex)) % allNodes.numRows === 1) return true;
 
     const colIndex = n1.colIndex;
 
     const range = (n2.rowIndex > n1.rowIndex)
         ? makeRange1(n1.rowIndex, n2.rowIndex)
-        : makeRange2(n2.rowIndex, n1.rowIndex, numRows, true);
+        : makeRange2(n2.rowIndex, n1.rowIndex, allNodes.numRows, true);
 
     return !range.some(rowIndex => !!findNode(allNodes, colIndex, rowIndex));
 };
 
-const isUpAdjacent = (allNodes, numRows, n1, n2) => {
+const isUpAdjacent = (allNodes, n1, n2) => {
 
-    if ((Math.abs(n1.rowIndex - n2.rowIndex)) % numRows === 1) return true;
+    if ((Math.abs(n1.rowIndex - n2.rowIndex)) % allNodes.numRows === 1) return true;
 
     const colIndex = n1.colIndex;
 
     const range = (n1.rowIndex > n2.rowIndex)
         ? makeRange1(n2.rowIndex, n1.rowIndex)
-        : makeRange2(n1.rowIndex, n2.rowIndex, numRows, true);
+        : makeRange2(n1.rowIndex, n2.rowIndex, allNodes.numRows, true);
 
     return !range.some(rowIndex => !!findNode(allNodes, colIndex, rowIndex));
 };
 
 const drawLinks = (allNodes, drawingArea) => {
 
-    const { numCols, numRows } = calcNumColsAndRows(allNodes);
-
     const drawHorizontalLinks = n => {
 
         const right = n.right;
-        if (isRightAdjacent(allNodes, numCols, n, right)) {
+        if (isRightAdjacent(allNodes, n, right)) {
             drawingArea.drawNormalRightLink(n, right);
         }
         else {
@@ -232,7 +229,7 @@ const drawLinks = (allNodes, drawingArea) => {
         }
 
         const left = n.left;
-        if (isLeftAdjacent(allNodes, numCols, n, left)) {
+        if (isLeftAdjacent(allNodes, n, left)) {
             drawingArea.drawNormalLeftLink(n, left);
         }
         else {
@@ -245,7 +242,7 @@ const drawLinks = (allNodes, drawingArea) => {
         if (n.colIndex === -1 && n.rowIndex === -1) return;
 
         const down = n.down;
-        if (isDownAdjacent(allNodes, numRows, n, down)) {
+        if (isDownAdjacent(allNodes, n, down)) {
             drawingArea.drawNormalDownLink(n, down);
         }
         else {
@@ -253,7 +250,7 @@ const drawLinks = (allNodes, drawingArea) => {
         }
 
         const up = n.up;
-        if (isUpAdjacent(allNodes, numRows, n, up)) {
+        if (isUpAdjacent(allNodes, n, up)) {
             drawingArea.drawNormalUpLink(n, up);
         }
         else {
@@ -357,9 +354,13 @@ const onSearchStep = () => {
     return (rowIndices, root) => {
 
         if (searchSteps.length === 0) {
-            const drawingArea = new DrawingAreaSvg(svg);
             allNodes = findAllNodes(root);
-            drawInitialStructure(root, allNodes, drawingArea);
+            const { numCols, numRows } = calcNumColsAndRows(allNodes);
+            allNodes.root = root;
+            allNodes.numCols = numCols;
+            allNodes.numRows = numRows;
+            const drawingArea = new DrawingAreaSvg(svg);
+            drawInitialStructure(allNodes, drawingArea);
             drawingArea.insertElementsIntoDOM();
         }
 
@@ -371,10 +372,7 @@ const onSearchStep = () => {
     };
 };
 
-const generator = solutionGenerator(matrix, onSearchStep());
-const iteratorObject = generator.next();
-if (!iteratorObject.done) {
-    const solution = iteratorObject.value;
-    console.log(`solution: ${JSON.stringify(solution)}`);
-}
+const solutions = solve(matrix, onSearchStep());
+solutions.forEach((solution, index) =>
+    console.log(`solution[${index}]: ${JSON.stringify(solution)}`));
 onStep(0);
