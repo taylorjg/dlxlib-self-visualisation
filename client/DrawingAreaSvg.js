@@ -84,24 +84,22 @@ export class DrawingAreaSvg {
         rect.setAttribute('data-coords', this.nodeToCoordsString(node));
     }
 
-    drawTopGoingAroundLink(n1, coveredNodes) {
+    drawTopGoingAroundLink(n1, n2) {
 
-        const firstCoveredNode = coveredNodes[0];
-        const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
-        const displacement = (firstCoveredNode.nex - firstCoveredNode.nwx) * 1.2;
+        const displacement = (n1.nex - n1.nwx) * 1.2;
 
         const a1 = n1.nex;
         const b1 = n1.ney;
-        const g1 = firstCoveredNode.nwx;
+        const g1 = n1.nwx + (n1.width * 2);
         const h1 = b1 - displacement;
         const e1 = (a1 + g1) / 2;
         const f1 = (b1 + h1) / 2;
         const c1 = e1;
         const d1 = b1;
 
-        const a2 = lastCoveredNode.nex;
+        const a2 = n2.nex - (n2.width * 2);
         const b2 = h1;
-        const g2 = a2 + lastCoveredNode.width;
+        const g2 = n2.nwx - (n2.width / 2);
         const h2 = b1;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
@@ -113,24 +111,22 @@ export class DrawingAreaSvg {
     }
 
     // TODO: we may need to "come in" after each covered node (like the "up" going around link does in figure 4, column D).
-    drawBottomGoingRoundLink(n2, coveredNodes) {
+    drawBottomGoingRoundLink(n1, n2) {
 
-        const firstCoveredNode = coveredNodes[0];
-        const lastCoveredNode = coveredNodes[coveredNodes.length - 1];
-        const displacement = (firstCoveredNode.nex - firstCoveredNode.nwx) * 1.2;
+        const displacement = (n1.nex - n1.nwx) * 1.2;
 
-        const a1 = n2.swx;
-        const b1 = n2.swy;
-        const g1 = lastCoveredNode.sex;
+        const a1 = n1.swx;
+        const b1 = n1.swy;
+        const g1 = n1.sex - (n1.width * 2);
         const h1 = b1 + displacement;
         const e1 = (a1 + g1) / 2;
         const f1 = (b1 + h1) / 2;
         const c1 = e1;
         const d1 = b1;
         
-        const a2 = firstCoveredNode.swx;
+        const a2 = n2.swx + (n2.width * 2);
         const b2 = h1;
-        const g2 = a2 - firstCoveredNode.width;
+        const g2 = n2.sex + (n2.width / 2);
         const h2 = b1;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
@@ -218,13 +214,12 @@ export class DrawingAreaSvg {
         }
     }
 
-    drawGoingAroundRightLink(n1, n2, coveredNodes) {
+    drawGoingAroundRightLink(n1, n2) {
         if (n2.colIndex > n1.colIndex) {
-            this.drawTopGoingAroundLink(n1, coveredNodes);
-            // this.drawGoingAroundRightLinkHelper(n1, coveredNodes);
+            this.drawTopGoingAroundLink(n1, n2);
         }
         else {
-            // this.drawGoingAroundRightLinkHelper(n1, ???);
+            // TODO
         }
     }
 
@@ -238,13 +233,12 @@ export class DrawingAreaSvg {
         }
     }
 
-    drawGoingAroundLeftLink(n1, n2, coveredNodes) {
+    drawGoingAroundLeftLink(n1, n2) {
         if (n1.colIndex > n2.colIndex) {
-            this.drawBottomGoingRoundLink(n1, coveredNodes);
-            // this.drawGoingAroundLeftLinkHelper(n1, coveredNodes);
+            this.drawBottomGoingRoundLink(n1, n2);
         }
         else {
-            // this.drawGoingAroundLeftLinkHelper(n1, ???);
+            // TODO
         }
     }
 
@@ -286,52 +280,6 @@ export class DrawingAreaSvg {
         }
     }
 
-    /* ---------- OLD STUFF ---------- */
-
-    // drawHorizontalLinks(n1, n2, coveredNodes) {
-    //     if (coveredNodes.length) {
-    //         this.drawHorizontalGoingAroundLinks(n1, n2, coveredNodes);
-    //     }
-    //     this.createLine(n1.nex, n1.ney, n2.x, n1.ney, 'green', null, true);
-    //     this.createLine(n2.swx, n2.swy, n1.x + n1.width, n2.swy, 'green', null, true);
-    // }
-
-    // drawHorizontalLinksToRightEdge(n, coveredNodes) {
-    //     if (coveredNodes.length) {
-    //         this.drawHorizontalGoingAroundLinks(n, { swx: this.width, swy: n.swy }, coveredNodes);
-    //     }
-    //     this.createLine(n.nex, n.ney, this.width, n.ney, 'green', null, true);
-    //     this.createLine(this.width, n.swy, n.x + n.width, n.swy, 'green', null, true);
-    // }
-
-    // drawHorizontalLinksFromLeftEdge(n) {
-    //     const lastColCovered = !!n.left.oldRights.length;
-    //     const bottomLineColour = lastColCovered ? 'red' : 'green';
-    //     this.createLine(0, n.nwy, n.x, n.nwy, 'green', null, true);
-    //     this.createLine(n.swx, n.swy, 0, n.swy, bottomLineColour, null, true);
-    // }
-
-    // drawVerticalLinks(n1, n2, coveredNodes) {
-    //     if (coveredNodes.length) {
-    //         this.drawVerticalGoingAroundLinks(n1, n2, coveredNodes);
-    //     }
-    //     this.createLine(n1.sex, n1.sey, n1.sex, n2.y, 'green', null, true);
-    //     this.createLine(n2.nwx, n2.nwy, n2.nwx, n1.y + n1.height, 'green', null, true);
-    // }
-
-    // drawVerticalLinksToBottomEdge(n, coveredNodes) {
-    //     if (coveredNodes.length) {
-    //         this.drawVerticalGoingAroundLinks(n, { nwx: n.nwx, nwy: this.height }, coveredNodes);
-    //     }
-    // }
-
-    // drawVerticalLinksFromTopEdge(n) {
-    //     const lastRowCovered = !!n.up.oldDowns.length;
-    //     const leftLineColour = lastRowCovered ? 'red' : 'green';
-    //     this.createLine(n.nex, 0, n.nex, n.y, 'green', null, true);
-    //     this.createLine(n.nwx, n.nwy, n.nwx, 0, leftLineColour, null, true);
-    // }
-
     addCoveredNode(node) {
         this.coveredNodes.push(node);
     }
@@ -344,6 +292,14 @@ export class DrawingAreaSvg {
     resetCoveredNodes() {
         const elements = Array.from(document.querySelectorAll('[data-coords]'));
         elements.forEach(element => element.setAttribute('class', ''));
+    }
+
+    setCoveredNode(n) {
+        const coordsString = this.nodeToCoordsString(n);
+        const element = document.querySelector(`[data-coords='${coordsString}']`);
+        if (element) {
+            element.setAttribute('class', 'covered');
+        }
     }
 
     setCoveredNodes() {

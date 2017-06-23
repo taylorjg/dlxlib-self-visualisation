@@ -8,8 +8,6 @@ export class DataObject {
         this.down = this;
         this.left = this;
         this.right = this;
-        this.oldRights = [];
-        this.oldDowns = [];
         if (listHeader) {
             listHeader.addDataObject(this);
         }
@@ -30,7 +28,6 @@ export class DataObject {
     }
 
     unlinkFromColumn() {
-        this.up.oldDowns.unshift(this);
         this.down.up = this.up;
         this.up.down = this.down;
     }
@@ -38,7 +35,6 @@ export class DataObject {
     relinkIntoColumn() {
         this.down.up = this;
         this.up.down = this;
-        this.up.oldDowns.shift();
     }
 
     loopUp(fn) { this.loop(fn, 'up'); }

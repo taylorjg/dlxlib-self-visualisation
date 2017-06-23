@@ -8,7 +8,6 @@ export class ColumnObject extends DataObject {
     }
 
     unlinkColumnHeader() {
-        this.left.oldRights.unshift(this);
         this.right.left = this.left;
         this.left.right = this.right;
     }
@@ -16,7 +15,6 @@ export class ColumnObject extends DataObject {
     relinkColumnHeader() {
         this.right.left = this;
         this.left.right = this;
-        this.left.oldRights.shift();
     }
 
     addDataObject(dataObject) {
