@@ -138,9 +138,42 @@ const getVerticalCoveredNodes = n => {
     return xs.concat(...ys).sort((a, b) => a.rowIndex - b.rowIndex);
 };
 
-const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
+const findCoveredNodes = root => {
 
-    const { nodes } = rootToStructure(root);
+    const allCoveredNodes = [];
+
+    const findCoveredNodesOf = n => {
+        const coveredNodes = getVerticalCoveredNodes(n);
+        coveredNodes.forEach(n2 => {
+            allCoveredNodes.push(n2);
+        });
+    };
+
+    const findUncoveredNodesOf = n => {
+        n.loopDown(n2 => {
+            allCoveredNodes.push(n2);
+        });
+    };
+
+    const findCoveredColumnHeadersOf = ch => {
+        ch.loopDown(findCoveredNodesOf);
+        const coveredColumnHeaders = getHorizontalCoveredNodes(ch);
+        coveredColumnHeaders.forEach(ch2 => {
+            findUncoveredNodesOf(ch2);
+            findCoveredNodesOf(ch2);
+            ch2.loopDown(findCoveredNodesOf);
+            allCoveredNodes.push(ch2);
+        });
+    };
+
+    findCoveredColumnHeadersOf(root);
+    root.loopRight(findCoveredColumnHeadersOf);
+    root.loopRight(findCoveredNodesOf);
+
+    return allCoveredNodes;
+};
+
+const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
 
     const drawHorizontalLinks = n1 => {
         const coveredNodes = getHorizontalCoveredNodes(n1);
@@ -166,44 +199,8 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
         }
     };
 
-    bless(nodeWidth, nodeHeight)(root);
-    root.loopRight(bless(nodeWidth, nodeHeight));
-    nodes.forEach(bless(nodeWidth, nodeHeight));
-
-    const allCoveredNodes = [];
-
-    const addCoveredNode = n => {
-        allCoveredNodes.push(n);
-        drawingArea.addCoveredNode(n);
-    };
-
-    const blessCoveredNodesOf = n => {
-        const coveredNodes = getVerticalCoveredNodes(n);
-        coveredNodes.forEach(n2 => {
-            bless(nodeWidth, nodeHeight)(n2);
-            addCoveredNode(n2);
-        });
-    };
-    const blessUncoveredNodesOf = n => {
-        n.loopDown(n2 => {
-            bless(nodeWidth, nodeHeight)(n2);
-            addCoveredNode(n2);
-        });
-    };
-    const blessCoveredColumnHeadersOf = ch => {
-        ch.loopDown(blessCoveredNodesOf);
-        const coveredColumnHeaders = getHorizontalCoveredNodes(ch);
-        coveredColumnHeaders.forEach(ch2 => {
-            bless(nodeWidth, nodeHeight)(ch2);
-            blessUncoveredNodesOf(ch2);
-            blessCoveredNodesOf(ch2);
-            ch2.loopDown(blessCoveredNodesOf);
-            addCoveredNode(ch2);
-        });
-    };
-    blessCoveredColumnHeadersOf(root);
-    root.loopRight(blessCoveredColumnHeadersOf);
-    root.loopRight(blessCoveredNodesOf);
+    const { nodes } = rootToStructure(root);
+    const allCoveredNodes = findCoveredNodes(root);
 
     drawHorizontalLinks(root);
     root.loopRight(drawHorizontalLinks);
@@ -212,9 +209,8 @@ const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
     nodes.forEach(drawVerticalLinks);
 
     allCoveredNodes.forEach(n => {
-        if (n.rowIndex >= 0) {
-            drawHorizontalLinks(n);
-        }
+        drawingArea.addCoveredNode(n);
+        drawHorizontalLinks(n);
         drawVerticalLinks(n);
     });
 };
