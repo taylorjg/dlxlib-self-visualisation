@@ -15,9 +15,11 @@ const COLUMN_NAMES = matrix[0].map((_, index) => String.fromCodePoint(CODE_POINT
 
 const rootToStructure = root => {
     const nodes = [];
+    nodes.push(root);
     let maxRowIndex = 0;
     let colIndex = 0;
     root.loopRight(columnHeader => {
+        nodes.push(columnHeader);
         columnHeader.loopDown(node => {
             nodes.push(node);
             if (node.rowIndex > maxRowIndex) maxRowIndex = node.rowIndex;
@@ -121,6 +123,8 @@ const drawInitialStructure = (root, drawingArea) => {
     nodes.forEach(drawNode);
 
     return {
+        numCols,
+        numRows,
         nodeWidth,
         nodeHeight
     };
@@ -173,43 +177,121 @@ const findCoveredNodes = root => {
     return allCoveredNodes;
 };
 
-const drawLinks = (nodeWidth, nodeHeight, root, drawingArea) => {
+const findNode = (allNodes, colIndex, rowIndex) =>
+    allNodes.find(n => n.colIndex === colIndex && n.rowIndex === rowIndex);
 
-    const drawHorizontalLinks = n1 => {
-        const coveredNodes = getHorizontalCoveredNodes(n1);
-        const n2 = n1.right;
-        if (n2.colIndex > n1.colIndex) {
-            drawingArea.drawHorizontalLinks(n1, n2, coveredNodes);
-        }
-        else {
-            drawingArea.drawHorizontalLinksToRightEdge(n1, coveredNodes);
-            drawingArea.drawHorizontalLinksFromLeftEdge(n2);
-        }
-    };
+const makeRange1 = (l, h) => {
+    return Array.from(Array(h - l - 1).keys()).map(x => x + l + 1);
+};
 
-    const drawVerticalLinks = n1 => {
-        const coveredNodes = getVerticalCoveredNodes(n1);
-        let n2 = n1.down;
-        if (n2.rowIndex > n1.rowIndex) {
-            drawingArea.drawVerticalLinks(n1, n2, coveredNodes);
-        }
-        else {
-            drawingArea.drawVerticalLinksToBottomEdge(n1, coveredNodes);
-            drawingArea.drawVerticalLinksFromTopEdge(n2);
-        }
-    };
+const makeRange2 = (l, h, numRowsOrCols, includeMinus1) => {
+    const v1 = includeMinus1 ? [-1] : [];
+    const v2 = v1.concat(Array.from(Array(numRowsOrCols).keys()));
+    const v4 = v2.filter(x => x < l || x > h);
+    return v4;
+};
+
+const isRightAdjacent = (allNodes, numCols, n1, n2) => {
+
+    if ((Math.abs(n1.colIndex - n2.colIndex)) % numCols === 1) return true;
+
+    const rowIndex = n1.rowIndex;
+
+    const range = (n2.colIndex > n1.colIndex)
+        ? makeRange1(n1.colIndex, n2.colIndex)
+        : makeRange2(n2.colIndex, n1.colIndex, numCols, rowIndex === -1);
+
+    return !range.some(colIndex => !!findNode(allNodes, colIndex, rowIndex));
+};
+
+const isLeftAdjacent = (allNodes, numCols, n1, n2) => {
+
+    if ((Math.abs(n1.colIndex - n2.colIndex)) % numCols === 1) return true;
+
+    const rowIndex = n1.rowIndex;
+
+    const range = (n1.colIndex > n2.colIndex)
+        ? makeRange1(n2.colIndex, n1.colIndex)
+        : makeRange2(n1.colIndex, n2.colIndex, numCols, rowIndex === -1);
+
+    return !range.some(colIndex => !!findNode(allNodes, colIndex, rowIndex));
+};
+
+const isDownAdjacent = (allNodes, numRows, n1, n2) => {
+
+    if ((Math.abs(n1.rowIndex - n2.rowIndex)) % numRows === 1) return true;
+
+    const colIndex = n1.colIndex;
+
+    const range = (n2.rowIndex > n1.rowIndex)
+        ? makeRange1(n1.rowIndex, n2.rowIndex)
+        : makeRange2(n2.rowIndex, n1.rowIndex, numRows, true);
+
+    return !range.some(rowIndex => !!findNode(allNodes, colIndex, rowIndex));
+};
+
+const isUpAdjacent = (allNodes, numRows, n1, n2) => {
+
+    if ((Math.abs(n1.rowIndex - n2.rowIndex)) % numRows === 1) return true;
+
+    const colIndex = n1.colIndex;
+
+    const range = (n1.rowIndex > n2.rowIndex)
+        ? makeRange1(n2.rowIndex, n1.rowIndex)
+        : makeRange2(n1.rowIndex, n2.rowIndex, numRows, true);
+
+    return !range.some(rowIndex => !!findNode(allNodes, colIndex, rowIndex));
+};
+
+// const n2s = n => `(${n.colIndex},${n.rowIndex})`;
+
+const drawLinks = (numCols, numRows, nodeWidth, nodeHeight, root, drawingArea) => {
 
     const { nodes } = rootToStructure(root);
     const allCoveredNodes = findCoveredNodes(root);
+    const allNodes = nodes.concat(allCoveredNodes);
 
-    drawHorizontalLinks(root);
-    root.loopRight(drawHorizontalLinks);
-    root.loopRight(drawVerticalLinks);
-    nodes.forEach(drawHorizontalLinks);
-    nodes.forEach(drawVerticalLinks);
+    const drawHorizontalLinks = n => {
 
-    allCoveredNodes.forEach(n => {
-        drawingArea.addCoveredNode(n);
+        const right = n.right;
+        if (isRightAdjacent(allNodes, numCols, n, right)) {
+            drawingArea.drawNormalRightLink(n, right);
+        }
+        else {
+            drawingArea.drawGoingAroundRightLink(n, right);
+        }
+
+        const left = n.left;
+        if (isLeftAdjacent(allNodes, numCols, n, left)) {
+            drawingArea.drawNormalLeftLink(n, left);
+        }
+        else {
+            drawingArea.drawGoingAroundLeftLink(n, left);
+        }
+    };
+
+    const drawVerticalLinks = n => {
+
+        if (n === root) return;
+
+        const down = n.down;
+        if (isDownAdjacent(allNodes, numRows, n, down)) {
+            drawingArea.drawNormalDownLink(n, down);
+        }
+        else {
+            drawingArea.drawGoingAroundDownLink(n, down);
+        }
+
+        const up = n.up;
+        if (isUpAdjacent(allNodes, numRows, n, up)) {
+            drawingArea.drawNormalUpLink(n, up);
+        }
+        else {
+            drawingArea.drawGoingAroundUpLink(n, up);
+        }
+    };
+
+    allNodes.forEach(n => {
         drawHorizontalLinks(n);
         drawVerticalLinks(n);
     });
@@ -301,6 +383,8 @@ btnLastStep.addEventListener('click', () => onStep(searchSteps.length - 1));
 
 const onSearchStep = () => {
 
+    let numCols;
+    let numRows;
     let nodeWidth;
     let nodeHeight;
 
@@ -310,12 +394,14 @@ const onSearchStep = () => {
             const drawingArea = new DrawingAreaSvg(svg);
             const dimensions = drawInitialStructure(root, drawingArea);
             drawingArea.insertElementsIntoDOM();
+            numCols = dimensions.numCols;
+            numRows = dimensions.numRows;
             nodeWidth = dimensions.nodeWidth;
             nodeHeight = dimensions.nodeHeight;
         }
 
         const drawingArea = new DrawingAreaSvg(svg);
-        drawLinks(nodeWidth, nodeHeight, root, drawingArea);
+        drawLinks(numCols, numRows, nodeWidth, nodeHeight, root, drawingArea);
         const subMatrixText = populateSubMatrix(root);
         const partialSolutionText = populatePartialSolution(rowIndices);
         searchSteps.push({ drawingArea, subMatrixText, partialSolutionText });

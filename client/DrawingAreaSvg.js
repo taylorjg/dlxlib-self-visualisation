@@ -208,6 +208,60 @@ export class DrawingAreaSvg {
         this.drawLeftGoingRoundLink(n2, coveredNodes);
     }
 
+    drawNormalRightLink(n1, n2) {
+        if (n2.colIndex > n1.colIndex) {
+            this.createLine(n1.nex, n1.ney, n2.x, n1.ney, 'green', null, true);
+        }
+        else {
+            this.createLine(n1.nex, n1.ney, this.width, n1.ney, 'green', null, true);
+            this.createLine(0, n2.nwy, n2.x, n2.nwy, 'green', null, true);
+        }
+    }
+
+    drawGoingAroundRightLink(/*n1, n2*/) {
+    }
+
+    drawNormalLeftLink(n1, n2) {
+        if (n1.colIndex > n2.colIndex) {
+            this.createLine(n1.swx, n1.swy, n2.x + n2.width, n1.swy, 'green', null, true);
+        }
+        else {
+            this.createLine(n1.swx, n1.swy, 0, n1.swy, 'green', null, true);
+            this.createLine(this.width, n2.sey, n2.x + n2.width, n2.sey, 'green', null, true);
+        }
+    }
+
+    drawGoingAroundLeftLink(/*n1, n2*/) {
+    }
+
+    drawNormalDownLink(n1, n2) {
+        if (n2.rowIndex > n1.rowIndex) {
+            this.createLine(n1.sex, n1.sey, n1.sex, n2.y, 'green', null, true);
+        }
+        else {
+            this.createLine(n1.sex, n1.sey, n1.sex, this.height, 'green', null, true);
+            this.createLine(n2.nex, 0, n2.nex, n2.y, 'green', null, true);
+        }
+    }
+
+    drawGoingAroundDownLink(/*n1, n2*/) {
+    }
+
+    drawNormalUpLink(n1, n2) {
+        if (n1.rowIndex > n2.rowIndex) {
+            this.createLine(n1.nwx, n1.nwy, n1.nwx, n2.y + n2.height, 'green', null, true);
+        }
+        else {
+            this.createLine(n2.swx, this.height, n2.swx, n2.y + n2.height, 'green', null, true);
+            this.createLine(n1.nwx, n1.nwy, n1.nwx, 0, 'green', null, true);
+        }
+    }
+
+    drawGoingAroundUpLink(/*n1, n2*/) {
+    }
+
+    /* ---------- OLD STUFF ---------- */
+
     drawHorizontalLinks(n1, n2, coveredNodes) {
         if (coveredNodes.length) {
             this.drawHorizontalGoingAroundLinks(n1, n2, coveredNodes);
@@ -243,8 +297,6 @@ export class DrawingAreaSvg {
         if (coveredNodes.length) {
             this.drawVerticalGoingAroundLinks(n, { nwx: n.nwx, nwy: this.height }, coveredNodes);
         }
-        this.createLine(n.sex, n.sey, n.sex, this.height, 'green', null, true);
-        this.createLine(n.nwx, this.height, n.nwx, n.y + n.height, 'green', null, true);
     }
 
     drawVerticalLinksFromTopEdge(n) {
