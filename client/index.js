@@ -13,23 +13,24 @@ const matrix = [
 const CODE_POINT_A = 'A'.codePointAt(0);
 const COLUMN_NAMES = matrix[0].map((_, index) => String.fromCodePoint(CODE_POINT_A + index));
 
-const rootToStructure = root => {
+const findAllNodes = root => {
     const nodes = [];
     nodes.push(root);
-    let maxRowIndex = 0;
-    let colIndex = 0;
     root.loopRight(columnHeader => {
         nodes.push(columnHeader);
         columnHeader.loopDown(node => {
             nodes.push(node);
-            if (node.rowIndex > maxRowIndex) maxRowIndex = node.rowIndex;
         });
-        colIndex++;
     });
 
+    return nodes;
+};
+
+const calcNumColsAndRows = allNodes => {
+    const maxColIndex = allNodes.reduce((acc, n) => Math.max(acc, n.colIndex), 0);
+    const maxRowIndex = allNodes.reduce((acc, n) => Math.max(acc, n.rowIndex), 0);
     return {
-        nodes,
-        numCols: colIndex,
+        numCols: maxColIndex + 1,
         numRows: maxRowIndex + 1
     };
 };
@@ -84,98 +85,71 @@ const bless = (nodeWidth, nodeHeight) => node => {
     node.sey = node.y + node.height - inset;
 };
 
-const drawInitialStructure = (root, drawingArea) => {
+const drawInitialStructure = (root, allNodes, drawingArea) => {
 
-    const { nodes, numCols, numRows } = rootToStructure(root);
+    const { numCols, numRows } = calcNumColsAndRows(allNodes);
     const nodeWidth = drawingArea.width / (numCols + 1);
     const nodeHeight = drawingArea.height / (numRows + 2);
 
-    const drawDots = node => {
+    const drawNode = node => {
+        drawingArea.drawNodeRect(node);
         drawingArea.drawDot(node.nwx, node.nwy);
         drawingArea.drawDot(node.nex, node.ney);
         drawingArea.drawDot(node.swx, node.swy);
         drawingArea.drawDot(node.sex, node.sey);
     };
 
-    const drawRoot = () => {
-        drawingArea.drawNodeRect(root);
-        drawDots(root);
-    };
-
-    const drawColumnHeader = colummHeader => {
-        drawingArea.drawNodeRect(colummHeader);
-        drawDots(colummHeader);
-    };
-
-    const drawNode = node => {
-        drawingArea.drawNodeRect(node);
-        drawDots(node);
-    };
-
-    bless(nodeWidth, nodeHeight)(root);
-    root.loopRight(bless(nodeWidth, nodeHeight));
-    nodes.forEach(bless(nodeWidth, nodeHeight));
-
+    allNodes.forEach(bless(nodeWidth, nodeHeight));
     drawingArea.drawBorders();
-
-    drawRoot();
-    root.loopRight(drawColumnHeader);
-    nodes.forEach(drawNode);
-
-    return {
-        numCols,
-        numRows,
-        nodeWidth,
-        nodeHeight
-    };
+    allNodes.forEach(drawNode);
 };
 
-const getHorizontalCoveredNodes = n => {
-    const xs = n.oldRights;
-    const ys = xs.map(getHorizontalCoveredNodes);
-    return xs.concat(...ys).sort((a, b) => a.colIndex - b.colIndex);
-};
+// const getHorizontalCoveredNodes = n => {
+//     const xs = n.oldRights;
+//     const ys = xs.map(getHorizontalCoveredNodes);
+//     return xs.concat(...ys).sort((a, b) => a.colIndex - b.colIndex);
+// };
 
-const getVerticalCoveredNodes = n => {
-    const xs = n.oldDowns;
-    const ys = xs.map(getVerticalCoveredNodes);
-    return xs.concat(...ys).sort((a, b) => a.rowIndex - b.rowIndex);
-};
+// const getVerticalCoveredNodes = n => {
+//     const xs = n.oldDowns;
+//     const ys = xs.map(getVerticalCoveredNodes);
+//     return xs.concat(...ys).sort((a, b) => a.rowIndex - b.rowIndex);
+// };
 
-const findCoveredNodes = root => {
+// const findCoveredNodes = root => {
 
-    const allCoveredNodes = [];
+//     const allCoveredNodes = [];
 
-    const findCoveredNodesOf = n => {
-        const coveredNodes = getVerticalCoveredNodes(n);
-        coveredNodes.forEach(n2 => {
-            allCoveredNodes.push(n2);
-        });
-    };
+//     const findCoveredNodesOf = n => {
+//         const coveredNodes = getVerticalCoveredNodes(n);
+//         coveredNodes.forEach(n2 => {
+//             allCoveredNodes.push(n2);
+//         });
+//     };
 
-    const findUncoveredNodesOf = n => {
-        n.loopDown(n2 => {
-            allCoveredNodes.push(n2);
-        });
-    };
+//     const findUncoveredNodesOf = n => {
+//         n.loopDown(n2 => {
+//             allCoveredNodes.push(n2);
+//         });
+//     };
 
-    const findCoveredColumnHeadersOf = ch => {
-        ch.loopDown(findCoveredNodesOf);
-        const coveredColumnHeaders = getHorizontalCoveredNodes(ch);
-        coveredColumnHeaders.forEach(ch2 => {
-            findUncoveredNodesOf(ch2);
-            findCoveredNodesOf(ch2);
-            ch2.loopDown(findCoveredNodesOf);
-            allCoveredNodes.push(ch2);
-        });
-    };
+//     const findCoveredColumnHeadersOf = ch => {
+//         ch.loopDown(findCoveredNodesOf);
+//         const coveredColumnHeaders = getHorizontalCoveredNodes(ch);
+//         coveredColumnHeaders.forEach(ch2 => {
+//             findUncoveredNodesOf(ch2);
+//             findCoveredNodesOf(ch2);
+//             ch2.loopDown(findCoveredNodesOf);
+//             allCoveredNodes.push(ch2);
+//         });
+//     };
 
-    findCoveredColumnHeadersOf(root);
-    root.loopRight(findCoveredColumnHeadersOf);
-    root.loopRight(findCoveredNodesOf);
+//     findCoveredColumnHeadersOf(root);
+//     root.loopRight(findCoveredColumnHeadersOf);
+//     root.loopRight(findCoveredNodesOf);
 
-    return allCoveredNodes;
-};
+//     return allCoveredNodes;
+// };
 
 const findNode = (allNodes, colIndex, rowIndex) =>
     allNodes.find(n => n.colIndex === colIndex && n.rowIndex === rowIndex);
@@ -243,13 +217,9 @@ const isUpAdjacent = (allNodes, numRows, n1, n2) => {
     return !range.some(rowIndex => !!findNode(allNodes, colIndex, rowIndex));
 };
 
-// const n2s = n => `(${n.colIndex},${n.rowIndex})`;
+const drawLinks = (allNodes, drawingArea) => {
 
-const drawLinks = (numCols, numRows, nodeWidth, nodeHeight, root, drawingArea) => {
-
-    const { nodes } = rootToStructure(root);
-    const allCoveredNodes = findCoveredNodes(root);
-    const allNodes = nodes.concat(allCoveredNodes);
+    const { numCols, numRows } = calcNumColsAndRows(allNodes);
 
     const drawHorizontalLinks = n => {
 
@@ -272,7 +242,7 @@ const drawLinks = (numCols, numRows, nodeWidth, nodeHeight, root, drawingArea) =
 
     const drawVerticalLinks = n => {
 
-        if (n === root) return;
+        if (n.colIndex === -1 && n.rowIndex === -1) return;
 
         const down = n.down;
         if (isDownAdjacent(allNodes, numRows, n, down)) {
@@ -309,10 +279,10 @@ const btnLastStep = document.getElementById('btnLastStep');
 const lblSearchStep = document.getElementById('lblSearchStep');
 
 const populateSubMatrix = root => {
-    const ss = [];
+    const lines = [];
     const columnsPresent = [];
     root.loopRight(ch => ch.colIndex >= 0 && columnsPresent.push(ch.colIndex));
-    ss.push(columnsPresent.map(colIndex => COLUMN_NAMES[colIndex]).join(' '));
+    lines.push(columnsPresent.map(colIndex => COLUMN_NAMES[colIndex]).join(' '));
     const nodes = [];
     root.loopRight(ch => ch.loopDown(n => nodes.push({ colIndex: n.colIndex, rowIndex: n.rowIndex })));
     const rowIndices = Array.from(Array(matrix.length).keys());
@@ -323,11 +293,10 @@ const populateSubMatrix = root => {
             colIndicesOfOnes.forEach(colIndex => values[colIndex] = 1);
             const valuesPresent = values.filter((_, index) => columnsPresent.includes(index));
             const s = valuesPresent.join(' ');
-            ss.push(s);
+            lines.push(s);
         }
     });
-    const s = ss.join('\n');
-    return s;
+    return lines.join('\n');
 };
 
 const populatePartialSolution = rowIndices =>
@@ -383,25 +352,19 @@ btnLastStep.addEventListener('click', () => onStep(searchSteps.length - 1));
 
 const onSearchStep = () => {
 
-    let numCols;
-    let numRows;
-    let nodeWidth;
-    let nodeHeight;
+    let allNodes;
 
     return (rowIndices, root) => {
 
         if (searchSteps.length === 0) {
             const drawingArea = new DrawingAreaSvg(svg);
-            const dimensions = drawInitialStructure(root, drawingArea);
+            allNodes = findAllNodes(root);
+            drawInitialStructure(root, allNodes, drawingArea);
             drawingArea.insertElementsIntoDOM();
-            numCols = dimensions.numCols;
-            numRows = dimensions.numRows;
-            nodeWidth = dimensions.nodeWidth;
-            nodeHeight = dimensions.nodeHeight;
         }
 
         const drawingArea = new DrawingAreaSvg(svg);
-        drawLinks(numCols, numRows, nodeWidth, nodeHeight, root, drawingArea);
+        drawLinks(allNodes, drawingArea);
         const subMatrixText = populateSubMatrix(root);
         const partialSolutionText = populatePartialSolution(rowIndices);
         searchSteps.push({ drawingArea, subMatrixText, partialSolutionText });
