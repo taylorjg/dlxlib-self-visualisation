@@ -116,8 +116,6 @@ const makeRange2 = (l, h, numRowsOrCols, includeMinus1) => {
 
 const findTweenersHorizontally = (root, n1, n2) => {
 
-    if ((Math.abs(n1.colIndex - n2.colIndex)) % root.numCols === 1) return [];
-
     const rowIndex = n1.rowIndex;
 
     const range = (n2.colIndex > n1.colIndex)
@@ -132,8 +130,6 @@ const findTweenersHorizontally = (root, n1, n2) => {
 };
 
 const findTweenersVertically = (root, n1, n2) => {
-
-    if ((Math.abs(n1.rowIndex - n2.rowIndex)) % root.numRows === 1) return [];
 
     const colIndex = n1.colIndex;
 
@@ -247,7 +243,11 @@ const createLinksMap = root => {
         right: makeCoords(n.right),
         left: makeCoords(n.left),
         down: makeCoords(n.down),
-        up: makeCoords(n.up)
+        up: makeCoords(n.up),
+        rightTweeners: findTweenersHorizontally(root, n, n.right).map(makeCoords),
+        leftTweeners: findTweenersHorizontally(root, n.left, n).map(makeCoords),
+        downTweeners: findTweenersVertically(root, n, n.down).map(makeCoords),
+        upTweeners: findTweenersVertically(root, n.up, n).map(makeCoords)
     });
     const pairs = root.allNodes.map(n => [n, makeLinks(n)]);
     return new Map(pairs);
@@ -284,13 +284,19 @@ const onStep = index => {
     updateButtonState();
 
     if (searchSteps.length) {
-        const { drawingArea, subMatrixText, partialSolutionText } = searchSteps[currentSearchStepIndex];
+        const { root, drawingArea, subMatrixText, partialSolutionText, linksMap } = searchSteps[currentSearchStepIndex];
         drawingArea.removeLinks();
         drawingArea.resetCoveredNodes();
         drawingArea.insertElementsIntoDOM();
         drawingArea.setCoveredNodes();
         preSubMatrix.innerHTML = subMatrixText;
         prePartialSolution.innerHTML = partialSolutionText;
+        const onNodeClick = function(e) {
+            const links = linksMap.get(e.target.node);
+            console.log(`links: ${JSON.stringify(links)}`);
+        };
+        root.allNodes.forEach(n => drawingArea.removeClickHandler(n));
+        root.allNodes.forEach(n => drawingArea.addClickHandler(n, onNodeClick));
     }
 };
 
@@ -317,7 +323,7 @@ const onSearchStep = (rowIndices, root) => {
     const subMatrixText = populateSubMatrix(root);
     const partialSolutionText = populatePartialSolution(rowIndices);
     const linksMap = createLinksMap(root);
-    searchSteps.push({ drawingArea, subMatrixText, partialSolutionText, linksMap });
+    searchSteps.push({ root, drawingArea, subMatrixText, partialSolutionText, linksMap });
 };
 
 const displaySolutions = solutions =>

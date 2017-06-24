@@ -82,6 +82,8 @@ export class DrawingAreaSvg {
     drawNodeRect(node) {
         const rect = this.createRect(node.x, node.y, node.width, node.height, 'green');
         rect.setAttribute('data-coords', this.nodeToCoordsString(node));
+        rect.node = node;
+        return rect;
     }
 
     drawTopGoingAroundLink(n1, n2, tweeners) {
@@ -289,5 +291,29 @@ export class DrawingAreaSvg {
 
     insertElementsIntoDOM() {
         this.elements.forEach(element => this.svg.appendChild(element));
+    }
+
+    removeClickHandler(node) {
+        const coordsString = this.nodeToCoordsString(node);
+        const element = document.querySelector(`[data-coords='${coordsString}']`);
+        if (element) {
+            const onNodeClick = element.onNodeClick;
+            if (onNodeClick) {
+                element.removeEventListener('click', element.onNodeClick);
+            }
+        }
+    }
+
+    addClickHandler(node, onNodeClick) {
+        const coordsString = this.nodeToCoordsString(node);
+        const element = document.querySelector(`[data-coords='${coordsString}']`);
+        if (element) {
+
+            // TODO: this is a bit nasty! try to find a better way!
+            // - see also this.removeClickHandler
+            element.onNodeClick = onNodeClick;
+
+            element.addEventListener('click', onNodeClick);
+        }
     }
 }
