@@ -238,6 +238,21 @@ const populatePartialSolution = rowIndices =>
         .map(rowIndex => `${rowIndex}: ${matrix[rowIndex].join(' ')}`)
         .join(`\n`);
 
+const createLinksMap = root => {
+    const makeCoords = n => ({
+        colIndex: n.colIndex,
+        rowIndex: n.rowIndex
+    });
+    const makeLinks = n => ({
+        right: makeCoords(n.right),
+        left: makeCoords(n.left),
+        down: makeCoords(n.down),
+        up: makeCoords(n.up)
+    });
+    const pairs = root.allNodes.map(n => [n, makeLinks(n)]);
+    return new Map(pairs);
+};
+
 const updateButtonState = () => {
     if (searchSteps.length === 0) {
         btnFirstStep.disabled = true;
@@ -301,7 +316,8 @@ const onSearchStep = (rowIndices, root) => {
     drawLinks(root, drawingArea);
     const subMatrixText = populateSubMatrix(root);
     const partialSolutionText = populatePartialSolution(rowIndices);
-    searchSteps.push({ drawingArea, subMatrixText, partialSolutionText });
+    const linksMap = createLinksMap(root);
+    searchSteps.push({ drawingArea, subMatrixText, partialSolutionText, linksMap });
 };
 
 const displaySolutions = solutions =>
