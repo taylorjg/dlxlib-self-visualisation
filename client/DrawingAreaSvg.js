@@ -110,7 +110,6 @@ export class DrawingAreaSvg {
         this.createPath(data, 'red');
     }
 
-    // TODO: we may need to "come in" after each covered node (like the "up" going around link does in figure 4, column D).
     drawBottomGoingRoundLink(n1, n2) {
 
         const displacement = (n1.nex - n1.nwx) * 1.2;
@@ -143,19 +142,19 @@ export class DrawingAreaSvg {
         const lastTweener = tweeners[tweeners.length - 1];
         const displacement = (n1.nex - n2.nwx) * 1.2;
 
-        const a1 = firstTweener.nex; // firstCoveredNode.nex;
-        const b1 = firstTweener.ney - firstTweener.width; // firstCoveredNode.ney - firstCoveredNode.width;
+        const a1 = firstTweener.nex;
+        const b1 = firstTweener.ney - firstTweener.width;
         const g1 = a1 + displacement;
-        const h1 = firstTweener.ney; // firstCoveredNode.ney;
+        const h1 = firstTweener.ney;
         const e1 = (a1 + g1) / 2;
         const f1 = (b1 + h1) / 2;
         const c1 = a1;
         const d1 = f1;
 
         const a2 = g1;
-        const b2 = lastTweener.sey; // lastCoveredNode.sey;
+        const b2 = lastTweener.sey;
         const g2 = a1;
-        const h2 = lastTweener.sey + lastTweener.width; // lastCoveredNode.sey + lastCoveredNode.width;
+        const h2 = lastTweener.sey + lastTweener.width;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
         const c2 = a2;
@@ -165,10 +164,8 @@ export class DrawingAreaSvg {
         this.createPath(data, 'red');
     }
 
-    // TODO: looks like we should "come in" after each covered node (see figure 4, column D).
     drawLeftGoingRoundLink(n1, n2, tweeners) {
 
-        const firstTweener = tweeners[0];
         const lastTweener = tweeners[tweeners.length - 1];
         const displacement = (n1.nex - n1.nwx) * 1.2;
 
@@ -182,9 +179,9 @@ export class DrawingAreaSvg {
         const d1 = f1;
         
         const a2 = g1;
-        const b2 = firstTweener.nwy;
+        const b2 = lastTweener.nwy;
         const g2 = a1;
-        const h2 = b2 - firstTweener.width;
+        const h2 = b2 - lastTweener.width;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
         const c2 = a2;
