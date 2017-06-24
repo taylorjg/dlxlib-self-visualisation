@@ -18,43 +18,15 @@ const findAllNodes = root => {
     nodes.push(root);
     root.loopRight(columnHeader => {
         nodes.push(columnHeader);
-        columnHeader.loopDown(node => {
-            nodes.push(node);
-        });
+        columnHeader.loopDown(node => nodes.push(node));
     });
-
     return nodes;
 };
 
 const findNode = (allNodes, colIndex, rowIndex) =>
     allNodes.find(n => n.colIndex === colIndex && n.rowIndex === rowIndex);
 
-// const n2s = n => `(${n.colIndex}, ${n.rowIndex})`;
-
-// const dumpRightLinks = allNodes => {
-//     allNodes.forEach(n => console.log(`n: ${n2s(n)}: right: ${n2s(n.right)}`));
-// };
-
-// const dumpLeftLinks = allNodes => {
-//     allNodes.forEach(n => console.log(`n: ${n2s(n)}: left: ${n2s(n.left)}`));
-// };
-
-// const dumpDownLinks = allNodes => {
-//     allNodes.forEach(n => console.log(`n: ${n2s(n)}: down: ${n2s(n.down)}`));
-// };
-
-// const dumpUpLinks = allNodes => {
-//     allNodes.forEach(n => console.log(`n: ${n2s(n)}: up: ${n2s(n.up)}`));
-// };
-
-// const dumpAllNodeLinks = allNodes => {
-//     dumpRightLinks(allNodes.filter(n => n.rowIndex === -1));
-//     dumpLeftLinks(allNodes.filter(n => n.rowIndex === -1));
-//     dumpDownLinks(allNodes);
-//     dumpUpLinks(allNodes);
-// };    
-
-const calcNumColsAndRows = allNodes => {
+const calcDimensions = allNodes => {
     const maxColIndex = allNodes.reduce((acc, n) => Math.max(acc, n.colIndex), 0);
     const maxRowIndex = allNodes.reduce((acc, n) => Math.max(acc, n.rowIndex), 0);
     return {
@@ -113,10 +85,10 @@ const bless = (nodeWidth, nodeHeight) => node => {
     node.sey = node.y + node.height - inset;
 };
 
-const drawInitialStructure = (allNodes, drawingArea) => {
+const drawInitialStructure = (root, drawingArea) => {
 
-    const nodeWidth = drawingArea.width / (allNodes.numCols + 1);
-    const nodeHeight = drawingArea.height / (allNodes.numRows + 2);
+    const nodeWidth = drawingArea.width / (root.numCols + 1);
+    const nodeHeight = drawingArea.height / (root.numRows + 2);
 
     const drawNode = node => {
         drawingArea.drawNodeRect(node);
@@ -126,9 +98,9 @@ const drawInitialStructure = (allNodes, drawingArea) => {
         drawingArea.drawDot(node.sex, node.sey);
     };
 
-    allNodes.forEach(bless(nodeWidth, nodeHeight));
+    root.allNodes.forEach(bless(nodeWidth, nodeHeight));
     drawingArea.drawBorders();
-    allNodes.forEach(drawNode);
+    root.allNodes.forEach(drawNode);
 };
 
 const makeRange1 = (l, h) => {
@@ -142,47 +114,45 @@ const makeRange2 = (l, h, numRowsOrCols, includeMinus1) => {
     return v4;
 };
 
-const findTweenersHorizontally = (allNodes, n1, n2) => {
+const findTweenersHorizontally = (root, n1, n2) => {
 
-    if ((Math.abs(n1.colIndex - n2.colIndex)) % allNodes.numCols === 1) return [];
+    if ((Math.abs(n1.colIndex - n2.colIndex)) % root.numCols === 1) return [];
 
     const rowIndex = n1.rowIndex;
 
     const range = (n2.colIndex > n1.colIndex)
         ? makeRange1(n1.colIndex, n2.colIndex)
-        : makeRange2(n2.colIndex, n1.colIndex, allNodes.numCols, rowIndex === -1);
+        : makeRange2(n2.colIndex, n1.colIndex, root.numCols, rowIndex === -1);
 
     return range.reduce((acc, colIndex) => {
-        const tweener = findNode(allNodes, colIndex, rowIndex);
+        const tweener = findNode(root.allNodes, colIndex, rowIndex);
         if (tweener) acc.push(tweener);
         return acc;
     }, []);
 };
 
-const findTweenersVertically = (allNodes, n1, n2) => {
+const findTweenersVertically = (root, n1, n2) => {
 
-    if ((Math.abs(n1.rowIndex - n2.rowIndex)) % allNodes.numRows === 1) return [];
+    if ((Math.abs(n1.rowIndex - n2.rowIndex)) % root.numRows === 1) return [];
 
     const colIndex = n1.colIndex;
 
     const range = (n2.rowIndex > n1.rowIndex)
         ? makeRange1(n1.rowIndex, n2.rowIndex)
-        : makeRange2(n2.rowIndex, n1.rowIndex, allNodes.numRows, true);
+        : makeRange2(n2.rowIndex, n1.rowIndex, root.numRows, true);
 
     return range.reduce((acc, rowIndex) => {
-        const tweener = findNode(allNodes, colIndex, rowIndex);
+        const tweener = findNode(root.allNodes, colIndex, rowIndex);
         if (tweener) acc.push(tweener);
         return acc;
     }, []);
 };
 
-const drawLinks = (allNodes, drawingArea) => {
-
-    // dumpAllNodeLinks(allNodes);
+const drawLinks = (root, drawingArea) => {
 
     const drawHorizontalLinks = n => {
 
-        const rightTweeners = findTweenersHorizontally(allNodes, n, n.right);
+        const rightTweeners = findTweenersHorizontally(root, n, n.right);
         if (rightTweeners.length) {
             drawingArea.drawGoingAroundRightLink(n, n.right, rightTweeners);
         }
@@ -190,7 +160,7 @@ const drawLinks = (allNodes, drawingArea) => {
             drawingArea.drawNormalRightLink(n, n.right);
         }
 
-        const leftTweeners = findTweenersHorizontally(allNodes, n.left, n);
+        const leftTweeners = findTweenersHorizontally(root, n.left, n);
         if (leftTweeners.length) {
             drawingArea.drawGoingAroundLeftLink(n, n.left, leftTweeners);
         }
@@ -203,7 +173,7 @@ const drawLinks = (allNodes, drawingArea) => {
 
         if (n.colIndex === -1 && n.rowIndex === -1) return;
 
-        const downTweeners = findTweenersVertically(allNodes, n, n.down);
+        const downTweeners = findTweenersVertically(root, n, n.down);
         if (downTweeners.length) {
             drawingArea.drawGoingAroundDownLink(n, n.down, downTweeners);
         }
@@ -211,7 +181,7 @@ const drawLinks = (allNodes, drawingArea) => {
             drawingArea.drawNormalDownLink(n, n.down);
         }
 
-        const upTweeners = findTweenersVertically(allNodes, n.up, n);
+        const upTweeners = findTweenersVertically(root, n.up, n);
         if (upTweeners.length) {
             drawingArea.drawGoingAroundUpLink(n, n.up, upTweeners);
         }
@@ -220,13 +190,14 @@ const drawLinks = (allNodes, drawingArea) => {
         }
     };
 
-    allNodes.forEach(n => {
+    root.allNodes.forEach(n => {
         drawHorizontalLinks(n);
         drawVerticalLinks(n);
     });
 
-    const allCurentlyReachableNodes = findAllNodes(allNodes.root);
-    const allCoveredNodes = allNodes.filter(n => !allCurentlyReachableNodes.find(rn => rn.colIndex === n.colIndex && rn.rowIndex === n.rowIndex));
+    const allCurrentlyReachableNodes = findAllNodes(root);
+    const isCovered = n => !allCurrentlyReachableNodes.find(rn => rn.colIndex === n.colIndex && rn.rowIndex === n.rowIndex);
+    const allCoveredNodes = root.allNodes.filter(isCovered);
     allCoveredNodes.forEach(drawingArea.addCoveredNode.bind(drawingArea));
 };
 
@@ -313,32 +284,30 @@ btnStepBackwards.addEventListener('click', () => onStep(currentSearchStepIndex -
 btnStepForwards.addEventListener('click', () => onStep(currentSearchStepIndex + 1));
 btnLastStep.addEventListener('click', () => onStep(searchSteps.length - 1));
 
-const onSearchStep = () => {
+const onSearchStep = (rowIndices, root) => {
 
-    let allNodes;
-
-    return (rowIndices, root) => {
-
-        if (searchSteps.length === 0) {
-            allNodes = findAllNodes(root);
-            const { numCols, numRows } = calcNumColsAndRows(allNodes);
-            allNodes.root = root;
-            allNodes.numCols = numCols;
-            allNodes.numRows = numRows;
-            const drawingArea = new DrawingAreaSvg(svg);
-            drawInitialStructure(allNodes, drawingArea);
-            drawingArea.insertElementsIntoDOM();
-        }
-
+    if (searchSteps.length === 0) {
+        const allNodes = findAllNodes(root);
+        const { numCols, numRows } = calcDimensions(allNodes);
+        root.allNodes = allNodes;
+        root.numCols = numCols;
+        root.numRows = numRows;
         const drawingArea = new DrawingAreaSvg(svg);
-        drawLinks(allNodes, drawingArea);
-        const subMatrixText = populateSubMatrix(root);
-        const partialSolutionText = populatePartialSolution(rowIndices);
-        searchSteps.push({ drawingArea, subMatrixText, partialSolutionText });
-    };
+        drawInitialStructure(root, drawingArea);
+        drawingArea.insertElementsIntoDOM();
+    }
+
+    const drawingArea = new DrawingAreaSvg(svg);
+    drawLinks(root, drawingArea);
+    const subMatrixText = populateSubMatrix(root);
+    const partialSolutionText = populatePartialSolution(rowIndices);
+    searchSteps.push({ drawingArea, subMatrixText, partialSolutionText });
 };
 
-const solutions = solve(matrix, onSearchStep());
-solutions.forEach((solution, index) =>
-    console.log(`solution[${index}]: ${JSON.stringify(solution)}`));
+const displaySolutions = solutions =>
+    solutions.forEach((solution, index) =>
+        console.log(`solution[${index}]: ${JSON.stringify(solution)}`));
+
+const solutions = solve(matrix, onSearchStep);
+displaySolutions(solutions);
 onStep(0);
