@@ -114,7 +114,7 @@ export class DrawingAreaSvg {
 
     drawBottomGoingRoundLink(n1, n2, tweeners, fromEdge) {
 
-        const firstTweener = tweeners[0];
+        // const firstTweener = tweeners[0];
         const lastTweener = tweeners[tweeners.length - 1];
         const displacement = (n1.nex - n1.nwx) * 1.2;
 
@@ -127,9 +127,9 @@ export class DrawingAreaSvg {
         const c1 = e1;
         const d1 = b1;
         
-        const a2 = firstTweener.swx;
+        const a2 = lastTweener.swx; // firstTweener.swx
         const b2 = h1;
-        const g2 = a2 - firstTweener.width;
+        const g2 = a2 - lastTweener.width; // a2 - firstTweener.width
         const h2 = b1;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
