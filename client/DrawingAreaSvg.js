@@ -19,7 +19,7 @@ export class DrawingAreaSvg {
         line.setAttribute('x2', x2);
         line.setAttribute('y2', y2);
         line.setAttribute('stroke', colour);
-        line.setAttribute('stroke-width', 0.5);
+        line.setAttribute('stroke-width', 1);
         if (dasharray) {
             line.setAttribute('stroke-dasharray', dasharray);
         }
@@ -84,22 +84,24 @@ export class DrawingAreaSvg {
         rect.setAttribute('data-coords', this.nodeToCoordsString(node));
     }
 
-    drawTopGoingAroundLink(n1, n2) {
+    drawTopGoingAroundLink(n1, n2, tweeners) {
 
+        const firstTweener = tweeners[0];
+        const lastTweener = tweeners[tweeners.length - 1];
         const displacement = (n1.nex - n1.nwx) * 1.2;
 
         const a1 = n1.nex;
         const b1 = n1.ney;
-        const g1 = n1.nwx + (n1.width * 2);
+        const g1 = firstTweener.nwx;
         const h1 = b1 - displacement;
         const e1 = (a1 + g1) / 2;
         const f1 = (b1 + h1) / 2;
         const c1 = e1;
         const d1 = b1;
 
-        const a2 = n2.nex - (n2.width * 2);
+        const a2 = lastTweener.nex;
         const b2 = h1;
-        const g2 = n2.nwx - (n2.width / 2);
+        const g2 = a2 + lastTweener.width;
         const h2 = b1;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
@@ -110,22 +112,24 @@ export class DrawingAreaSvg {
         this.createPath(data, 'red');
     }
 
-    drawBottomGoingRoundLink(n1, n2) {
+    drawBottomGoingRoundLink(n1, n2, tweeners, fromEdge) {
 
+        const firstTweener = tweeners[0];
+        const lastTweener = tweeners[tweeners.length - 1];
         const displacement = (n1.nex - n1.nwx) * 1.2;
 
-        const a1 = n1.swx;
+        const a1 = fromEdge ? this.width : n1.swx;
         const b1 = n1.swy;
-        const g1 = n1.sex - (n1.width * 2);
+        const g1 = lastTweener.sex;
         const h1 = b1 + displacement;
         const e1 = (a1 + g1) / 2;
         const f1 = (b1 + h1) / 2;
         const c1 = e1;
         const d1 = b1;
         
-        const a2 = n2.swx + (n2.width * 2);
+        const a2 = firstTweener.swx;
         const b2 = h1;
-        const g2 = n2.sex + (n2.width / 2);
+        const g2 = a2 - firstTweener.width;
         const h2 = b1;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
@@ -164,7 +168,7 @@ export class DrawingAreaSvg {
         this.createPath(data, 'red');
     }
 
-    drawLeftGoingRoundLink(n1, n2, tweeners) {
+    drawLeftGoingRoundLink(n1, n2, tweeners, fromEdge) {
 
         const lastTweener = tweeners[tweeners.length - 1];
         const displacement = (n1.nex - n1.nwx) * 1.2;
@@ -187,18 +191,8 @@ export class DrawingAreaSvg {
         const c2 = a2;
         const d2 = f2;
 
-        const data = `M${n1.nwx} ${n1.nwy} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
+        const data = `M${n1.nwx} ${fromEdge ? this.height : n1.nwy} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
         this.createPath(data, 'red');
-    }
-
-    drawHorizontalGoingAroundLinks(n1, n2, coveredNodes) {
-        this.drawTopGoingAroundLink(n1, coveredNodes);
-        this.drawBottomGoingRoundLink(n2, coveredNodes);
-    }
-
-    drawVerticalGoingAroundLinks(n1, n2, coveredNodes) {
-        this.drawRightGoingAroundLink(n1, coveredNodes);
-        this.drawLeftGoingRoundLink(n2, coveredNodes);
     }
 
     drawNormalRightLink(n1, n2) {
@@ -211,13 +205,8 @@ export class DrawingAreaSvg {
         }
     }
 
-    drawGoingAroundRightLink(n1, n2) {
-        if (n2.colIndex > n1.colIndex) {
-            this.drawTopGoingAroundLink(n1, n2);
-        }
-        else {
-            // TODO
-        }
+    drawGoingAroundRightLink(n1, n2, tweeners) {
+        this.drawTopGoingAroundLink(n1, n2, tweeners);
     }
 
     drawNormalLeftLink(n1, n2) {
@@ -230,12 +219,13 @@ export class DrawingAreaSvg {
         }
     }
 
-    drawGoingAroundLeftLink(n1, n2) {
+    drawGoingAroundLeftLink(n1, n2, tweeners) {
         if (n1.colIndex > n2.colIndex) {
-            this.drawBottomGoingRoundLink(n1, n2);
+            this.drawBottomGoingRoundLink(n1, n2, tweeners);
         }
         else {
-            // TODO
+            this.createLine(n1.swx, n1.swy, 0, n1.swy, 'red', null, true);
+            this.drawBottomGoingRoundLink(n1, n2, tweeners, true);
         }
     }
 
@@ -250,12 +240,7 @@ export class DrawingAreaSvg {
     }
 
     drawGoingAroundDownLink(n1, n2, tweeners) {
-        if (n2.rowIndex > n1.rowIndex) {
-            this.drawRightGoingAroundLink(n1, n2, tweeners);
-        }
-        else {
-            // TODO
-        }
+        this.drawRightGoingAroundLink(n1, n2, tweeners);
     }
 
     drawNormalUpLink(n1, n2) {
@@ -269,17 +254,13 @@ export class DrawingAreaSvg {
     }
 
     drawGoingAroundUpLink(n1, n2, tweeners) {
-        tweeners;
         if (n1.rowIndex > n2.rowIndex) {
             this.drawLeftGoingRoundLink(n1, n2, tweeners);
         }
         else {
-            // TODO
+            this.createLine(n1.nwx, n1.nwy, n1.nwx, 0, 'red', null, true);
+            this.drawLeftGoingRoundLink(n1, n2, tweeners, true);
         }
-    }
-
-    addCoveredNode(node) {
-        this.coveredNodes.push(node);
     }
 
     removeLinks() {
@@ -292,12 +273,8 @@ export class DrawingAreaSvg {
         elements.forEach(element => element.setAttribute('class', ''));
     }
 
-    setCoveredNode(n) {
-        const coordsString = this.nodeToCoordsString(n);
-        const element = document.querySelector(`[data-coords='${coordsString}']`);
-        if (element) {
-            element.setAttribute('class', 'covered');
-        }
+    addCoveredNode(node) {
+        this.coveredNodes.push(node);
     }
 
     setCoveredNodes() {

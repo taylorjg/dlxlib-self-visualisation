@@ -29,7 +29,7 @@ const findAllNodes = root => {
 const findNode = (allNodes, colIndex, rowIndex) =>
     allNodes.find(n => n.colIndex === colIndex && n.rowIndex === rowIndex);
 
-const n2s = n => `(${n.colIndex}, ${n.rowIndex})`;
+// const n2s = n => `(${n.colIndex}, ${n.rowIndex})`;
 
 // const dumpRightLinks = allNodes => {
 //     allNodes.forEach(n => console.log(`n: ${n2s(n)}: right: ${n2s(n.right)}`));
@@ -142,9 +142,9 @@ const makeRange2 = (l, h, numRowsOrCols, includeMinus1) => {
     return v4;
 };
 
-const isRightAdjacent = (allNodes,  n1, n2) => {
+const findTweenersHorizontally = (allNodes, n1, n2) => {
 
-    if ((Math.abs(n1.colIndex - n2.colIndex)) % allNodes.numCols === 1) return true;
+    if ((Math.abs(n1.colIndex - n2.colIndex)) % allNodes.numCols === 1) return [];
 
     const rowIndex = n1.rowIndex;
 
@@ -152,49 +152,14 @@ const isRightAdjacent = (allNodes,  n1, n2) => {
         ? makeRange1(n1.colIndex, n2.colIndex)
         : makeRange2(n2.colIndex, n1.colIndex, allNodes.numCols, rowIndex === -1);
 
-    return !range.some(colIndex => !!findNode(allNodes, colIndex, rowIndex));
+    return range.reduce((acc, colIndex) => {
+        const tweener = findNode(allNodes, colIndex, rowIndex);
+        if (tweener) acc.push(tweener);
+        return acc;
+    }, []);
 };
 
-const isLeftAdjacent = (allNodes, n1, n2) => {
-
-    if ((Math.abs(n1.colIndex - n2.colIndex)) % allNodes.numCols === 1) return true;
-
-    const rowIndex = n1.rowIndex;
-
-    const range = (n1.colIndex > n2.colIndex)
-        ? makeRange1(n2.colIndex, n1.colIndex)
-        : makeRange2(n1.colIndex, n2.colIndex, allNodes.numCols, rowIndex === -1);
-
-    return !range.some(colIndex => !!findNode(allNodes, colIndex, rowIndex));
-};
-
-const isDownAdjacent = (allNodes, n1, n2) => {
-
-    if ((Math.abs(n1.rowIndex - n2.rowIndex)) % allNodes.numRows === 1) return true;
-
-    const colIndex = n1.colIndex;
-
-    const range = (n2.rowIndex > n1.rowIndex)
-        ? makeRange1(n1.rowIndex, n2.rowIndex)
-        : makeRange2(n2.rowIndex, n1.rowIndex, allNodes.numRows, true);
-
-    return !range.some(rowIndex => !!findNode(allNodes, colIndex, rowIndex));
-};
-
-const isUpAdjacent = (allNodes, n1, n2) => {
-
-    if ((Math.abs(n1.rowIndex - n2.rowIndex)) % allNodes.numRows === 1) return true;
-
-    const colIndex = n1.colIndex;
-
-    const range = (n1.rowIndex > n2.rowIndex)
-        ? makeRange1(n2.rowIndex, n1.rowIndex)
-        : makeRange2(n1.rowIndex, n2.rowIndex, allNodes.numRows, true);
-
-    return !range.some(rowIndex => !!findNode(allNodes, colIndex, rowIndex));
-};
-
-const findNodesBetweenVertically = (allNodes, n1, n2) => {
+const findTweenersVertically = (allNodes, n1, n2) => {
 
     if ((Math.abs(n1.rowIndex - n2.rowIndex)) % allNodes.numRows === 1) return [];
 
@@ -217,20 +182,20 @@ const drawLinks = (allNodes, drawingArea) => {
 
     const drawHorizontalLinks = n => {
 
-        const right = n.right;
-        if (isRightAdjacent(allNodes, n, right)) {
-            drawingArea.drawNormalRightLink(n, right);
+        const rightTweeners = findTweenersHorizontally(allNodes, n, n.right);
+        if (rightTweeners.length) {
+            drawingArea.drawGoingAroundRightLink(n, n.right, rightTweeners);
         }
         else {
-            drawingArea.drawGoingAroundRightLink(n, right);
+            drawingArea.drawNormalRightLink(n, n.right);
         }
 
-        const left = n.left;
-        if (isLeftAdjacent(allNodes, n, left)) {
-            drawingArea.drawNormalLeftLink(n, left);
+        const leftTweeners = findTweenersHorizontally(allNodes, n.left, n);
+        if (leftTweeners.length) {
+            drawingArea.drawGoingAroundLeftLink(n, n.left, leftTweeners);
         }
         else {
-            drawingArea.drawGoingAroundLeftLink(n, left);
+            drawingArea.drawNormalLeftLink(n, n.left);
         }
     };
 
@@ -238,23 +203,20 @@ const drawLinks = (allNodes, drawingArea) => {
 
         if (n.colIndex === -1 && n.rowIndex === -1) return;
 
-        const down = n.down;
-        if (isDownAdjacent(allNodes, n, down)) {
-            drawingArea.drawNormalDownLink(n, down);
+        const downTweeners = findTweenersVertically(allNodes, n, n.down);
+        if (downTweeners.length) {
+            drawingArea.drawGoingAroundDownLink(n, n.down, downTweeners);
         }
         else {
-            const tweeners = findNodesBetweenVertically(allNodes, n, down);
-            drawingArea.drawGoingAroundDownLink(n, down, tweeners);
+            drawingArea.drawNormalDownLink(n, n.down);
         }
 
-        const up = n.up;
-        if (isUpAdjacent(allNodes, n, up)) {
-            drawingArea.drawNormalUpLink(n, up);
+        const upTweeners = findTweenersVertically(allNodes, n.up, n);
+        if (upTweeners.length) {
+            drawingArea.drawGoingAroundUpLink(n, n.up, upTweeners);
         }
         else {
-            const tweeners = findNodesBetweenVertically(allNodes, up, n);
-            console.log(`[up] n: ${n2s(n)}; up: ${n2s(up)}; tweeners: ${tweeners.map(n2s).join(', ')}`);
-            drawingArea.drawGoingAroundUpLink(n, up, tweeners);
+            drawingArea.drawNormalUpLink(n, n.up);
         }
     };
 
@@ -356,8 +318,6 @@ const onSearchStep = () => {
     let allNodes;
 
     return (rowIndices, root) => {
-
-        console.log(`[onSearchStep] starting search step: ${searchSteps.length + 1}`);
 
         if (searchSteps.length === 0) {
             allNodes = findAllNodes(root);
