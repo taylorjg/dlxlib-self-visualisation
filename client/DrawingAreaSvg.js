@@ -107,6 +107,16 @@ export class DrawingAreaSvg {
         this.createFilledPath(data, colour);
     }
 
+    drawArrowHeadDown(apex, colour) {
+        const data = `M${apex.x} ${apex.y} L${apex.x - 2} ${apex.y - 5} L${apex.x + 2} ${apex.y - 5} Z`;
+        this.createFilledPath(data, colour);
+    }
+
+    drawArrowHeadUp(apex, colour) {
+        const data = `M${apex.x} ${apex.y} L${apex.x - 2} ${apex.y + 5} L${apex.x + 2} ${apex.y + 5} Z`;
+        this.createFilledPath(data, colour);
+    }
+
     drawTopGoingAroundLink(n1, n2, tweeners) {
 
         const firstTweener = tweeners[0];
@@ -221,6 +231,7 @@ export class DrawingAreaSvg {
     drawNormalRightLink(n1, n2) {
         if (n2.colIndex > n1.colIndex) {
             this.createLine(n1.nex, n1.ney, n2.x, n1.ney, 'green', null, true);
+            this.drawArrowHeadRight({ x: n1.nex + (n1.width / 2) + 1, y: n1.ney }, 'green');
             this.drawArrowHeadRight({ x: n2.x - 1, y: n1.ney }, 'green');
         }
         else {
@@ -236,6 +247,7 @@ export class DrawingAreaSvg {
     drawNormalLeftLink(n1, n2) {
         if (n1.colIndex > n2.colIndex) {
             this.createLine(n1.swx, n1.swy, n2.x + n2.width, n1.swy, 'green', null, true);
+            this.drawArrowHeadLeft({ x: n1.swx - (n1.width / 2) - 1, y: n1.swy }, 'green');
             this.drawArrowHeadLeft({ x: n2.x + n2.width + 1, y: n1.swy }, 'green');
         }
         else {
@@ -257,6 +269,8 @@ export class DrawingAreaSvg {
     drawNormalDownLink(n1, n2) {
         if (n2.rowIndex > n1.rowIndex) {
             this.createLine(n1.sex, n1.sey, n1.sex, n2.y, 'green', null, true);
+            this.drawArrowHeadDown({ x: n1.sex, y: n1.sey + (n1.width / 2) + 1 }, 'green');
+            this.drawArrowHeadDown({ x: n1.nex, y: n2.y - 1 }, 'green');
         }
         else {
             this.createLine(n1.sex, n1.sey, n1.sex, this.height, 'green', null, true);
@@ -271,6 +285,8 @@ export class DrawingAreaSvg {
     drawNormalUpLink(n1, n2) {
         if (n1.rowIndex > n2.rowIndex) {
             this.createLine(n1.nwx, n1.nwy, n1.nwx, n2.y + n2.height, 'green', null, true);
+            this.drawArrowHeadUp({ x: n1.nwx, y: n1.ney - (n1.width / 2) - 1 }, 'green');
+            this.drawArrowHeadUp({ x: n2.swx, y: n2.y + n2.height + 1 }, 'green');
         }
         else {
             this.createLine(n2.swx, this.height, n2.swx, n2.y + n2.height, 'green', null, true);
