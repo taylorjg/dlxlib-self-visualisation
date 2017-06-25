@@ -59,6 +59,7 @@ const blessNode = (nodeWidth, nodeHeight) => node => {
 };
 
 const bless = (nodeWidth, nodeHeight) => node => {
+
     if (node.colIndex === -1 && node.rowIndex === -1) {
         blessRoot(nodeWidth, nodeHeight)(node);
     }
@@ -71,20 +72,16 @@ const bless = (nodeWidth, nodeHeight) => node => {
         }
     }
     
-    const insetHorizontal = node.width / 4;
-    const insetVertical = node.height / 4;
-
-    node.nwx = node.x + insetHorizontal;
-    node.nwy = node.y + insetVertical;
-
-    node.nex = node.x + node.width - insetHorizontal;
-    node.ney = node.y + insetVertical;
-
-    node.swx = node.x + insetHorizontal;
-    node.swy = node.y + node.height - insetVertical;
+    const inset = node.width / 4;
     
-    node.sex = node.x + node.width - insetHorizontal;
-    node.sey = node.y + node.height - insetVertical;
+    node.nwx = node.x + inset;
+    node.nwy = node.y + inset;
+    node.nex = node.x + node.width - inset;
+    node.ney = node.y + inset;
+    node.swx = node.x + inset;
+    node.swy = node.y + node.height - inset;
+    node.sex = node.x + node.width - inset;
+    node.sey = node.y + node.height - inset;
 };
 
 const drawInitialStructure = (root, drawingArea) => {

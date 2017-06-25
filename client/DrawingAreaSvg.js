@@ -123,8 +123,8 @@ export class DrawingAreaSvg {
         const lastTweener = tweeners[tweeners.length - 1];
         const displacement = (n1.nex - n1.nwx) * 1.2;
 
-        const a1 = n1.nex;
-        const b1 = n1.ney;
+        const a1 = firstTweener.nwx - firstTweener.width;
+        const b1 = firstTweener.ney;
         const g1 = firstTweener.nwx;
         const h1 = b1 - displacement;
         const e1 = (a1 + g1) / 2;
@@ -141,18 +141,17 @@ export class DrawingAreaSvg {
         const c2 = e2;
         const d2 = b2;
 
-        const data = `M${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
+        const data = `M${n1.nex} ${n1.ney} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
         this.createPath(data, 'red');
     }
 
     drawBottomGoingRoundLink(n1, n2, tweeners, fromEdge) {
 
-        // const firstTweener = tweeners[0];
         const lastTweener = tweeners[tweeners.length - 1];
         const displacement = (n1.nex - n1.nwx) * 1.2;
 
-        const a1 = fromEdge ? this.width : n1.swx;
-        const b1 = n1.swy;
+        const a1 = lastTweener.sex + lastTweener.width;
+        const b1 = lastTweener.sey;
         const g1 = lastTweener.sex;
         const h1 = b1 + displacement;
         const e1 = (a1 + g1) / 2;
@@ -160,16 +159,16 @@ export class DrawingAreaSvg {
         const c1 = e1;
         const d1 = b1;
         
-        const a2 = lastTweener.swx; // firstTweener.swx
+        const a2 = lastTweener.swx;
         const b2 = h1;
-        const g2 = a2 - lastTweener.width; // a2 - firstTweener.width
+        const g2 = a2 - lastTweener.width;
         const h2 = b1;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
         const c2 = e2;
         const d2 = b2;
 
-        const data = `M${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
+        const data = `M${fromEdge ? this.width : n1.swx} ${n1.swy} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
         this.createPath(data, 'red');
     }
 
