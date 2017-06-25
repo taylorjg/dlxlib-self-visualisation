@@ -63,6 +63,17 @@ export class DrawingAreaSvg {
         return path;
     }
 
+    createFilledPath(data, colour) {
+        const path = this.createElement('path');
+        path.setAttribute('d', data);
+        path.setAttribute('stroke', colour);
+        path.setAttribute('stroke-width', 1);
+        path.setAttribute('fill', colour);
+        path.setAttribute('class', 'link');
+        this.elements.push(path);
+        return path;
+    }
+
     drawBorders() {
         const dasharray = [1, 4];
         this.createLine(0, 0, this.width, 0, 'green', dasharray);
@@ -84,6 +95,16 @@ export class DrawingAreaSvg {
         rect.setAttribute('data-coords', this.nodeToCoordsString(node));
         rect.node = node;
         return rect;
+    }
+
+    drawArrowHeadRight(apex, colour) {
+        const data = `M${apex.x} ${apex.y} L${apex.x - 5} ${apex.y - 2} L${apex.x - 5} ${apex.y + 2} Z`;
+        this.createFilledPath(data, colour);
+    }
+
+    drawArrowHeadLeft(apex, colour) {
+        const data = `M${apex.x} ${apex.y} L${apex.x + 5} ${apex.y - 2} L${apex.x + 5} ${apex.y + 2} Z`;
+        this.createFilledPath(data, colour);
     }
 
     drawTopGoingAroundLink(n1, n2, tweeners) {
@@ -200,6 +221,7 @@ export class DrawingAreaSvg {
     drawNormalRightLink(n1, n2) {
         if (n2.colIndex > n1.colIndex) {
             this.createLine(n1.nex, n1.ney, n2.x, n1.ney, 'green', null, true);
+            this.drawArrowHeadRight({ x: n2.x - 1, y: n1.ney }, 'green');
         }
         else {
             this.createLine(n1.nex, n1.ney, this.width, n1.ney, 'green', null, true);
@@ -214,6 +236,7 @@ export class DrawingAreaSvg {
     drawNormalLeftLink(n1, n2) {
         if (n1.colIndex > n2.colIndex) {
             this.createLine(n1.swx, n1.swy, n2.x + n2.width, n1.swy, 'green', null, true);
+            this.drawArrowHeadLeft({ x: n2.x + n2.width + 1, y: n1.swy }, 'green');
         }
         else {
             this.createLine(n1.swx, n1.swy, 0, n1.swy, 'green', null, true);
