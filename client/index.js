@@ -37,29 +37,25 @@ const calcDimensions = allNodes => {
 
 const blessRoot = (nodeWidth, nodeHeight) => root => {
     const node = root;
-    node.width = nodeWidth / 2;
-    node.height = node.width * 2;
-    node.x = (nodeWidth - node.width) / 2;
-    node.y = ((2 * nodeHeight) - node.height) / 2;
+    node.width = nodeWidth;
+    node.height = nodeHeight * 2;
+    node.x = nodeWidth;
+    node.y = nodeHeight;
 };
 
 const blessColumnHeader = (nodeWidth, nodeHeight) => columnHeader => {
     const node = columnHeader;
-    const xBase = nodeWidth * (node.colIndex + 1);
-    node.width = nodeWidth / 2;
-    node.height = node.width * 2;
-    node.x = xBase + ((nodeWidth - node.width) / 2);
-    node.y = ((2 * nodeHeight) - node.height) / 2;
+    node.width = nodeWidth;
+    node.height = nodeHeight * 2;
+    node.x = nodeWidth * (2 * node.colIndex + 3);
+    node.y = nodeHeight;
 };
 
 const blessNode = (nodeWidth, nodeHeight) => node => {
-    const xBase = nodeWidth * (node.colIndex + 1);
-    const yBase = nodeHeight * (node.rowIndex + 2);
-    const side = Math.max(nodeWidth / 2, nodeHeight / 2);
-    node.x = xBase + ((nodeWidth - side) / 2);
-    node.y = yBase + ((nodeHeight - side) / 2);
-    node.width = side;
-    node.height = side;
+    node.width = nodeWidth;
+    node.height = nodeHeight;
+    node.x = nodeWidth * (2 * node.colIndex + 3);
+    node.y = nodeHeight * (2 * node.rowIndex + 4);
 };
 
 const bless = (nodeWidth, nodeHeight) => node => {
@@ -74,21 +70,27 @@ const bless = (nodeWidth, nodeHeight) => node => {
             blessNode(nodeWidth, nodeHeight)(node);
         }
     }
-    const inset = node.width / 4;
-    node.nwx = node.x + inset;
-    node.nwy = node.y + inset;
-    node.nex = node.x + node.width - inset;
-    node.ney = node.y + inset;
-    node.swx = node.x + inset;
-    node.sex = node.x + node.width - inset;
-    node.swy = node.y + node.height - inset;
-    node.sey = node.y + node.height - inset;
+    
+    const insetHorizontal = node.width / 4;
+    const insetVertical = node.height / 4;
+
+    node.nwx = node.x + insetHorizontal;
+    node.nwy = node.y + insetVertical;
+
+    node.nex = node.x + node.width - insetHorizontal;
+    node.ney = node.y + insetVertical;
+
+    node.swx = node.x + insetHorizontal;
+    node.swy = node.y + node.height - insetVertical;
+    
+    node.sex = node.x + node.width - insetHorizontal;
+    node.sey = node.y + node.height - insetVertical;
 };
 
 const drawInitialStructure = (root, drawingArea) => {
 
-    const nodeWidth = drawingArea.width / (root.numCols + 1);
-    const nodeHeight = drawingArea.height / (root.numRows + 2);
+    const nodeWidth = drawingArea.width / (2 * (root.numCols + 1) + 1);
+    const nodeHeight = drawingArea.height / (2 * (root.numRows + 2));
 
     const drawNode = node => {
         drawingArea.drawNodeRect(node);
