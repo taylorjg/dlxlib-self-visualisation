@@ -17,14 +17,15 @@ button {
     margin-left: 10px;
 }
 
-#tables {
-    display: inline-block;
-}
-
 #version {
     font-style: italic;
 }
 
 .covered {
     stroke: yellow;
+}
+
+#selMatrix {
+    margin-left: 10px;
+    margin-bottom: 10px;    
 }

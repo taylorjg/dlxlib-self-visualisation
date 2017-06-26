@@ -17,19 +17,27 @@
             <hr />
         </div>
         <div class="row">
-            <svg id="svg" width="400" height="400"></svg>
-            <div id="tables">
+            <div class="col-md-6 col-sm-12">
+                <div>
+                    <select id="selMatrix">
+                        <option value="0">Matrix 1 (One Solution)</option>
+                        <option value="1" selected>Matrix 2 (Three Solutions)</option>
+                    </select>
+                </div>
+                <div>
+                    <button id="btnFirstStep" class="btn btn-sm btn-primary"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
+                    <button id="btnStepBackwards" class="btn btn-sm btn-primary"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
+                    <button id="btnStepForwards" class="btn btn-sm btn-primary"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
+                    <button id="btnLastStep" class="btn btn-sm btn-primary"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
+                    <span id="lblSearchStep"></span>
+                </div>
+                <svg id="svg" width="400" height="400"></svg>
+            </div>
+            <div class="col-md-6 col-sm-12">
                 <h2>Current Submatrix</h2>
                 <pre id="preSubMatrix"></pre>
                 <h2>Current Partial Solution</h2>
                 <pre id="prePartialSolution"></pre>
-            </div>
-            <div>
-                <button id="btnFirstStep" class="btn btn-sm btn-primary"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
-                <button id="btnStepBackwards" class="btn btn-sm btn-primary"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
-                <button id="btnStepForwards" class="btn btn-sm btn-primary"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
-                <button id="btnLastStep" class="btn btn-sm btn-primary"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
-                <span id="lblSearchStep"></span>
             </div>
         </div>
     </div>

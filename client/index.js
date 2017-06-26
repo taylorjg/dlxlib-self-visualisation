@@ -1,7 +1,7 @@
 import { solve } from '../dlxlib';
 import { DrawingAreaSvg } from './DrawingAreaSvg';
 
-const matrix = [
+const MATRIX1 = [
     [0, 0, 1, 0, 1, 1, 0],
     [1, 0, 0, 1, 0, 0, 1],
     [0, 1, 1, 0, 0, 1, 0],
@@ -10,8 +10,19 @@ const matrix = [
     [0, 0, 0, 1, 1, 0, 1]
 ];
 
+const MATRIX2 = [
+    [1, 0, 0, 0],
+    [0, 1, 1, 0],
+    [1, 0, 0, 1],
+    [0, 0, 1, 1],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0]
+];
+
+const MATRICES = [MATRIX1, MATRIX2];
+
 const CODE_POINT_A = 'A'.codePointAt(0);
-const COLUMN_NAMES = matrix[0].map((_, index) => String.fromCodePoint(CODE_POINT_A + index));
+const COLUMN_NAMES = Array.from(Array(26).keys()).map((_, index) => String.fromCodePoint(CODE_POINT_A + index));
 
 const findAllNodes = root => {
     const nodes = [];
@@ -71,9 +82,9 @@ const bless = (nodeWidth, nodeHeight) => node => {
             blessNode(nodeWidth, nodeHeight)(node);
         }
     }
-    
+
     const inset = node.width / 4;
-    
+
     node.nwx = node.x + inset;
     node.nwy = node.y + inset;
     node.nex = node.x + node.width - inset;
@@ -201,6 +212,7 @@ let currentSearchStepIndex;
 const svg = document.getElementById('svg');
 const preSubMatrix = document.getElementById('preSubMatrix');
 const prePartialSolution = document.getElementById('prePartialSolution');
+const selMatrix = document.getElementById('selMatrix');
 const btnFirstStep = document.getElementById('btnFirstStep');
 const btnStepBackwards = document.getElementById('btnStepBackwards');
 const btnStepForwards = document.getElementById('btnStepForwards');
@@ -214,11 +226,11 @@ const populateSubMatrix = root => {
     lines.push(columnsPresent.map(colIndex => COLUMN_NAMES[colIndex]).join(' '));
     const nodes = [];
     root.loopRight(ch => ch.loopDown(n => nodes.push({ colIndex: n.colIndex, rowIndex: n.rowIndex })));
-    const rowIndices = Array.from(Array(matrix.length).keys());
+    const rowIndices = Array.from(Array(root.matrix.length).keys());
     rowIndices.forEach(rowIndex => {
         const colIndicesOfOnes = nodes.filter(n => n.rowIndex === rowIndex).map(n => n.colIndex);
         if (colIndicesOfOnes.length) {
-            const values = Array(matrix[0].length).fill(0);
+            const values = Array(root.matrix[0].length).fill(0);
             colIndicesOfOnes.forEach(colIndex => values[colIndex] = 1);
             const valuesPresent = values.filter((_, index) => columnsPresent.includes(index));
             const s = valuesPresent.join(' ');
@@ -228,9 +240,9 @@ const populateSubMatrix = root => {
     return lines.join('\n');
 };
 
-const populatePartialSolution = rowIndices =>
+const populatePartialSolution = (root, rowIndices) =>
     rowIndices
-        .map(rowIndex => `${rowIndex}: ${matrix[rowIndex].join(' ')}`)
+        .map(rowIndex => `${rowIndex}: ${root.matrix[rowIndex].join(' ')}`)
         .join(`\n`);
 
 const createLinksMap = root => {
@@ -290,7 +302,7 @@ const onStep = index => {
         drawingArea.setCoveredNodes();
         preSubMatrix.innerHTML = subMatrixText;
         prePartialSolution.innerHTML = partialSolutionText;
-        const onNodeClick = function(e) {
+        const onNodeClick = function (e) {
             const links = linksMap.get(e.target.node);
             console.log(`links: ${JSON.stringify(links)}`);
         };
@@ -304,11 +316,12 @@ btnStepBackwards.addEventListener('click', () => onStep(currentSearchStepIndex -
 btnStepForwards.addEventListener('click', () => onStep(currentSearchStepIndex + 1));
 btnLastStep.addEventListener('click', () => onStep(searchSteps.length - 1));
 
-const onSearchStep = (rowIndices, root) => {
+const onSearchStep = matrix => (rowIndices, root) => {
 
     if (searchSteps.length === 0) {
         const allNodes = findAllNodes(root);
         const { numCols, numRows } = calcDimensions(allNodes);
+        root.matrix = matrix;
         root.allNodes = allNodes;
         root.numCols = numCols;
         root.numRows = numRows;
@@ -320,15 +333,26 @@ const onSearchStep = (rowIndices, root) => {
     const drawingArea = new DrawingAreaSvg(svg);
     drawLinks(root, drawingArea);
     const subMatrixText = populateSubMatrix(root);
-    const partialSolutionText = populatePartialSolution(rowIndices);
+    const partialSolutionText = populatePartialSolution(root, rowIndices);
     const linksMap = createLinksMap(root);
     searchSteps.push({ root, drawingArea, subMatrixText, partialSolutionText, linksMap });
 };
 
-const displaySolutions = solutions =>
+const selectMatrix = matrix => {
+    searchSteps.splice(0);
+    Array.from(svg.children).forEach(element => element.remove());
+    const solutions = solve(matrix, onSearchStep(matrix));
     solutions.forEach((solution, index) =>
         console.log(`solution[${index}]: ${JSON.stringify(solution)}`));
+    onStep(0);
+};
 
-const solutions = solve(matrix, onSearchStep);
-displaySolutions(solutions);
-onStep(0);
+const onChangeSelectedMatrix = () => {
+    const matrixIndex = Number(selMatrix.value);
+    const matrix = MATRICES[matrixIndex];
+    selectMatrix(matrix);
+};
+
+selMatrix.addEventListener('change', onChangeSelectedMatrix);
+
+onChangeSelectedMatrix();
