@@ -1,3 +1,11 @@
+const BORDER_COLOUR = 'green';
+const DOT_COLOUR = 'green';
+const NODE_COLOUR = 'green';
+const NORMAL_LINK_COLOUR = 'green';
+const GOING_AROUND_LINK_COLOUR = 'red';
+const NORMAL_ARROW_HEAD_COLOUR = 'green';
+const GOING_AROUND_ARROW_HEAD_COLOUR = 'red';
+
 export class DrawingAreaSvg {
 
     constructor(svg) {
@@ -76,48 +84,68 @@ export class DrawingAreaSvg {
 
     drawBorders() {
         const dasharray = [1, 4];
-        this.createLine(0, 0, this.width, 0, 'green', dasharray);
-        this.createLine(this.width, 0, this.width, this.height, 'green', dasharray);
-        this.createLine(this.width, this.height, 0, this.height, 'green', dasharray);
-        this.createLine(0, this.height, 0, 0, 'green', dasharray);
+        this.createLine(0, 0, this.width, 0, BORDER_COLOUR, dasharray);
+        this.createLine(this.width, 0, this.width, this.height, BORDER_COLOUR, dasharray);
+        this.createLine(this.width, this.height, 0, this.height, BORDER_COLOUR, dasharray);
+        this.createLine(0, this.height, 0, 0, BORDER_COLOUR, dasharray);
     }
 
     drawDot(x, y) {
-        this.createCircle(x, y, 1, 'green');
+        this.createCircle(x, y, 1, DOT_COLOUR);
     }
 
     nodeToCoordsString(n) {
         return `(${n.colIndex},${n.rowIndex})`;
     }
 
+    nodeToElement(node) {
+        const coordsString = this.nodeToCoordsString(node);
+        return document.querySelector(`[data-coords='${coordsString}']`);
+    }
+
     drawNodeRect(node) {
-        const rect = this.createRect(node.x, node.y, node.width, node.height, 'green');
+        const rect = this.createRect(node.x, node.y, node.width, node.height, NODE_COLOUR);
         rect.setAttribute('data-coords', this.nodeToCoordsString(node));
         rect.node = node;
-        return rect;
     }
 
-    drawArrowHeadRight(apex, colour) {
-        const data = `M${apex.x} ${apex.y} L${apex.x - 5} ${apex.y - 2} L${apex.x - 5} ${apex.y + 2} Z`;
+    drawRightArrowHead(apex, colour) {
+        const data = `
+            M ${apex.x} ${apex.y}
+            L ${apex.x - 5} ${apex.y - 2}
+            L ${apex.x - 5} ${apex.y + 2}
+            Z`;
         this.createFilledPath(data, colour);
     }
 
-    drawArrowHeadLeft(apex, colour) {
-        const data = `M${apex.x} ${apex.y} L${apex.x + 5} ${apex.y - 2} L${apex.x + 5} ${apex.y + 2} Z`;
+    drawLeftArrowHead(apex, colour) {
+        const data = `
+            M ${apex.x} ${apex.y}
+            L ${apex.x + 5} ${apex.y - 2}
+            L ${apex.x + 5} ${apex.y + 2}
+            Z`;
         this.createFilledPath(data, colour);
     }
 
-    drawArrowHeadDown(apex, colour) {
-        const data = `M${apex.x} ${apex.y} L${apex.x - 2} ${apex.y - 5} L${apex.x + 2} ${apex.y - 5} Z`;
+    drawDownArrowHead(apex, colour) {
+        const data = `
+            M ${apex.x} ${apex.y}
+            L ${apex.x - 2} ${apex.y - 5}
+            L ${apex.x + 2} ${apex.y - 5}
+            Z`;
         this.createFilledPath(data, colour);
     }
 
-    drawArrowHeadUp(apex, colour) {
-        const data = `M${apex.x} ${apex.y} L${apex.x - 2} ${apex.y + 5} L${apex.x + 2} ${apex.y + 5} Z`;
+    drawUpArrowHead(apex, colour) {
+        const data = `
+            M ${apex.x} ${apex.y}
+            L ${apex.x - 2} ${apex.y + 5}
+            L ${apex.x + 2} ${apex.y + 5}
+            Z`;
         this.createFilledPath(data, colour);
     }
 
-    drawTopGoingAroundLink(n1, n2, tweeners) {
+    drawRightGoingAroundLinkHelper(n1, n2, tweeners) {
 
         const firstTweener = tweeners[0];
         const lastTweener = tweeners[tweeners.length - 1];
@@ -141,11 +169,16 @@ export class DrawingAreaSvg {
         const c2 = e2;
         const d2 = b2;
 
-        const data = `M${n1.nex} ${n1.ney} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
-        this.createPath(data, 'red');
+        const data = `
+            M ${n1.nex} ${n1.ney}
+            L ${a1} ${b1}
+            Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1}
+            L ${a2} ${b2}
+            Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
+        this.createPath(data, GOING_AROUND_LINK_COLOUR);
     }
 
-    drawBottomGoingRoundLink(n1, n2, tweeners, fromEdge) {
+    drawLeftGoingRoundLinkHelper(n1, n2, tweeners, fromEdge) {
 
         const lastTweener = tweeners[tweeners.length - 1];
         const displacement = (n1.nex - n1.nwx) * 1.2;
@@ -168,11 +201,17 @@ export class DrawingAreaSvg {
         const c2 = e2;
         const d2 = b2;
 
-        const data = `M${fromEdge ? this.width : n1.swx} ${n1.swy} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
-        this.createPath(data, 'red');
+        const data = `
+            M ${fromEdge ? this.width : n1.swx} ${n1.swy}
+            L ${a1} ${b1}
+            Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1}
+            L ${a2} ${b2}
+            Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
+
+        this.createPath(data, GOING_AROUND_LINK_COLOUR);
     }
 
-    drawRightGoingAroundLink(n1, n2, tweeners) {
+    drawDownGoingAroundLinkHelper(n1, n2, tweeners) {
 
         const firstTweener = tweeners[0];
         const lastTweener = tweeners[tweeners.length - 1];
@@ -196,11 +235,17 @@ export class DrawingAreaSvg {
         const c2 = a2;
         const d2 = f2;
 
-        const data = `M${n1.sex} ${n1.sey} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
-        this.createPath(data, 'red');
+        const data = `
+            M ${n1.sex} ${n1.sey}
+            L ${a1} ${b1}
+            Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1}
+            L ${a2} ${b2}
+            Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
+
+        this.createPath(data, GOING_AROUND_LINK_COLOUR);
     }
 
-    drawLeftGoingRoundLink(n1, n2, tweeners, fromEdge) {
+    drawUpGoingRoundLinkHelper(n1, n2, tweeners, fromEdge) {
 
         const lastTweener = tweeners[tweeners.length - 1];
         const displacement = (n1.nex - n1.nwx) * 1.2;
@@ -223,88 +268,94 @@ export class DrawingAreaSvg {
         const c2 = a2;
         const d2 = f2;
 
-        const data = `M${n1.nwx} ${fromEdge ? this.height : n1.nwy} L${a1} ${b1} Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1} L${a2} ${b2} Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
-        this.createPath(data, 'red');
+        const data = `
+            M ${n1.nwx} ${fromEdge ? this.height : n1.nwy}
+            L ${a1} ${b1}
+            Q ${c1} ${d1}, ${e1} ${f1} T ${g1} ${h1}
+            L ${a2} ${b2}
+            Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
+
+        this.createPath(data, GOING_AROUND_LINK_COLOUR);
     }
 
-    drawNormalRightLink(n1, n2) {
+    drawRightNormalLink(n1, n2) {
         if (n2.colIndex > n1.colIndex) {
-            this.createLine(n1.nex, n1.ney, n2.x, n1.ney, 'green', null, true);
+            this.createLine(n1.nex, n1.ney, n2.x, n1.ney, NORMAL_LINK_COLOUR, null, true);
         }
         else {
-            this.createLine(n1.nex, n1.ney, this.width, n1.ney, 'green', null, true);
-            this.createLine(0, n2.nwy, n2.x, n2.nwy, 'green', null, true);
+            this.createLine(n1.nex, n1.ney, this.width, n1.ney, NORMAL_LINK_COLOUR, null, true);
+            this.createLine(0, n2.nwy, n2.x, n2.nwy, NORMAL_LINK_COLOUR, null, true);
         }
-        this.drawArrowHeadRight({ x: n1.nex + (n1.width / 2) + 1, y: n1.ney }, 'green');
-        this.drawArrowHeadRight({ x: n2.x - 1, y: n1.ney }, 'green');
+        this.drawRightArrowHead({ x: n1.nex + (n1.width / 2) + 1, y: n1.ney }, NORMAL_ARROW_HEAD_COLOUR);
+        this.drawRightArrowHead({ x: n2.x - 1, y: n1.ney }, NORMAL_ARROW_HEAD_COLOUR);
     }
 
-    drawGoingAroundRightLink(n1, n2, tweeners) {
-        this.drawTopGoingAroundLink(n1, n2, tweeners);
-        this.drawArrowHeadRight({ x: n1.nex + (n1.width / 2) + 1, y: n1.ney }, 'red');
+    drawRightGoingAroundLink(n1, n2, tweeners) {
+        this.drawRightGoingAroundLinkHelper(n1, n2, tweeners);
+        this.drawRightArrowHead({ x: n1.nex + (n1.width / 2) + 1, y: n1.ney }, GOING_AROUND_ARROW_HEAD_COLOUR);
     }
 
-    drawNormalLeftLink(n1, n2) {
+    drawLeftNormalLink(n1, n2) {
         if (n1.colIndex > n2.colIndex) {
-            this.createLine(n1.swx, n1.swy, n2.x + n2.width, n1.swy, 'green', null, true);
+            this.createLine(n1.swx, n1.swy, n2.x + n2.width, n1.swy, NORMAL_LINK_COLOUR, null, true);
         }
         else {
-            this.createLine(n1.swx, n1.swy, 0, n1.swy, 'green', null, true);
-            this.createLine(this.width, n2.sey, n2.x + n2.width, n2.sey, 'green', null, true);
+            this.createLine(n1.swx, n1.swy, 0, n1.swy, NORMAL_LINK_COLOUR, null, true);
+            this.createLine(this.width, n2.sey, n2.x + n2.width, n2.sey, NORMAL_LINK_COLOUR, null, true);
         }
-        this.drawArrowHeadLeft({ x: n1.swx - (n1.width / 2) - 1, y: n1.swy }, 'green');
-        this.drawArrowHeadLeft({ x: n2.x + n2.width + 1, y: n1.swy }, 'green');
+        this.drawLeftArrowHead({ x: n1.swx - (n1.width / 2) - 1, y: n1.swy }, NORMAL_ARROW_HEAD_COLOUR);
+        this.drawLeftArrowHead({ x: n2.x + n2.width + 1, y: n1.swy }, NORMAL_ARROW_HEAD_COLOUR);
     }
 
-    drawGoingAroundLeftLink(n1, n2, tweeners) {
+    drawLeftGoingAroundLink(n1, n2, tweeners) {
         if (n1.colIndex > n2.colIndex) {
-            this.drawBottomGoingRoundLink(n1, n2, tweeners);
+            this.drawLeftGoingRoundLinkHelper(n1, n2, tweeners);
         }
         else {
-            this.createLine(n1.swx, n1.swy, 0, n1.swy, 'red', null, true);
-            this.drawBottomGoingRoundLink(n1, n2, tweeners, true);
+            this.createLine(n1.swx, n1.swy, 0, n1.swy, GOING_AROUND_LINK_COLOUR, null, true);
+            this.drawLeftGoingRoundLinkHelper(n1, n2, tweeners, true);
         }
-        this.drawArrowHeadLeft({ x: n1.swx - (n1.width / 2) - 1, y: n1.swy }, 'red');
+        this.drawLeftArrowHead({ x: n1.swx - (n1.width / 2) - 1, y: n1.swy }, GOING_AROUND_ARROW_HEAD_COLOUR);
     }
 
-    drawNormalDownLink(n1, n2) {
+    drawDownNormalLink(n1, n2) {
         if (n2.rowIndex > n1.rowIndex) {
-            this.createLine(n1.sex, n1.sey, n1.sex, n2.y, 'green', null, true);
+            this.createLine(n1.sex, n1.sey, n1.sex, n2.y, NORMAL_LINK_COLOUR, null, true);
         }
         else {
-            this.createLine(n1.sex, n1.sey, n1.sex, this.height, 'green', null, true);
-            this.createLine(n2.nex, 0, n2.nex, n2.y, 'green', null, true);
+            this.createLine(n1.sex, n1.sey, n1.sex, this.height, NORMAL_LINK_COLOUR, null, true);
+            this.createLine(n2.nex, 0, n2.nex, n2.y, NORMAL_LINK_COLOUR, null, true);
         }
-        this.drawArrowHeadDown({ x: n1.sex, y: n1.sey + (n1.width / 2) + 1 }, 'green');
-        this.drawArrowHeadDown({ x: n1.nex, y: n2.y - 1 }, 'green');
+        this.drawDownArrowHead({ x: n1.sex, y: n1.sey + (n1.width / 2) + 1 }, NORMAL_ARROW_HEAD_COLOUR);
+        this.drawDownArrowHead({ x: n1.nex, y: n2.y - 1 }, NORMAL_ARROW_HEAD_COLOUR);
     }
 
-    drawGoingAroundDownLink(n1, n2, tweeners) {
-        this.drawRightGoingAroundLink(n1, n2, tweeners);
-        this.drawArrowHeadDown({ x: n1.sex, y: n1.sey + (n1.width / 2) + 1 }, 'red');
+    drawDownGoingAroundLink(n1, n2, tweeners) {
+        this.drawDownGoingAroundLinkHelper(n1, n2, tweeners);
+        this.drawDownArrowHead({ x: n1.sex, y: n1.sey + (n1.width / 2) + 1 }, GOING_AROUND_ARROW_HEAD_COLOUR);
     }
 
-    drawNormalUpLink(n1, n2) {
+    drawUpNormalLink(n1, n2) {
         if (n1.rowIndex > n2.rowIndex) {
-            this.createLine(n1.nwx, n1.nwy, n1.nwx, n2.y + n2.height, 'green', null, true);
+            this.createLine(n1.nwx, n1.nwy, n1.nwx, n2.y + n2.height, NORMAL_LINK_COLOUR, null, true);
         }
         else {
-            this.createLine(n2.swx, this.height, n2.swx, n2.y + n2.height, 'green', null, true);
-            this.createLine(n1.nwx, n1.nwy, n1.nwx, 0, 'green', null, true);
+            this.createLine(n2.swx, this.height, n2.swx, n2.y + n2.height, NORMAL_LINK_COLOUR, null, true);
+            this.createLine(n1.nwx, n1.nwy, n1.nwx, 0, NORMAL_LINK_COLOUR, null, true);
         }
-        this.drawArrowHeadUp({ x: n1.nwx, y: n1.ney - (n1.width / 2) - 1 }, 'green');
-        this.drawArrowHeadUp({ x: n2.swx, y: n2.y + n2.height + 1 }, 'green');
+        this.drawUpArrowHead({ x: n1.nwx, y: n1.ney - (n1.width / 2) - 1 }, NORMAL_ARROW_HEAD_COLOUR);
+        this.drawUpArrowHead({ x: n2.swx, y: n2.y + n2.height + 1 }, NORMAL_ARROW_HEAD_COLOUR);
     }
 
-    drawGoingAroundUpLink(n1, n2, tweeners) {
+    drawUpGoingAroundLink(n1, n2, tweeners) {
         if (n1.rowIndex > n2.rowIndex) {
-            this.drawLeftGoingRoundLink(n1, n2, tweeners);
+            this.drawUpGoingRoundLinkHelper(n1, n2, tweeners);
         }
         else {
-            this.createLine(n1.nwx, n1.nwy, n1.nwx, 0, 'red', null, true);
-            this.drawLeftGoingRoundLink(n1, n2, tweeners, true);
+            this.createLine(n1.nwx, n1.nwy, n1.nwx, 0, GOING_AROUND_LINK_COLOUR, null, true);
+            this.drawUpGoingRoundLinkHelper(n1, n2, tweeners, true);
         }
-        this.drawArrowHeadUp({ x: n1.nwx, y: n1.ney - (n1.width / 2) - 1 }, 'red');
+        this.drawUpArrowHead({ x: n1.nwx, y: n1.ney - (n1.width / 2) - 1 }, GOING_AROUND_ARROW_HEAD_COLOUR);
     }
 
     removeLinks() {
@@ -323,8 +374,7 @@ export class DrawingAreaSvg {
 
     setCoveredNodes() {
         this.coveredNodes.forEach(node => {
-            const coordsString = this.nodeToCoordsString(node);
-            const element = document.querySelector(`[data-coords='${coordsString}']`);
+            const element = this.nodeToElement(node);
             if (element) {
                 element.setAttribute('class', 'covered');
             }
@@ -336,23 +386,22 @@ export class DrawingAreaSvg {
     }
 
     removeClickHandler(node) {
-        const coordsString = this.nodeToCoordsString(node);
-        const element = document.querySelector(`[data-coords='${coordsString}']`);
+        const element = this.nodeToElement(node);
         if (element) {
             const onNodeClick = element.onNodeClick;
             if (onNodeClick) {
-                element.removeEventListener('click', element.onNodeClick);
+                element.removeEventListener('click', onNodeClick);
             }
         }
     }
 
     addClickHandler(node, onNodeClick) {
-        const coordsString = this.nodeToCoordsString(node);
-        const element = document.querySelector(`[data-coords='${coordsString}']`);
+        const element = this.nodeToElement(node);
         if (element) {
 
             // TODO: this is a bit nasty! try to find a better way!
-            // - see also this.removeClickHandler
+            // - we save 'onNodeClick' on 'element' so that we can remove
+            //   it in 'this.removeClickHandler'.
             element.onNodeClick = onNodeClick;
 
             element.addEventListener('click', onNodeClick);

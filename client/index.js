@@ -95,24 +95,6 @@ const bless = (nodeWidth, nodeHeight) => node => {
     node.sey = node.y + node.height - inset;
 };
 
-const drawInitialStructure = (root, drawingArea) => {
-
-    const nodeWidth = drawingArea.width / (2 * (root.numCols + 1) + 1);
-    const nodeHeight = drawingArea.height / (2 * (root.numRows + 2));
-
-    const drawNode = node => {
-        drawingArea.drawNodeRect(node);
-        drawingArea.drawDot(node.nwx, node.nwy);
-        drawingArea.drawDot(node.nex, node.ney);
-        drawingArea.drawDot(node.swx, node.swy);
-        drawingArea.drawDot(node.sex, node.sey);
-    };
-
-    root.allNodes.forEach(bless(nodeWidth, nodeHeight));
-    drawingArea.drawBorders();
-    root.allNodes.forEach(drawNode);
-};
-
 const makeRange1 = (l, h) => {
     return Array.from(Array(h - l - 1).keys()).map(x => x + l + 1);
 };
@@ -154,24 +136,42 @@ const findTweenersVertically = (root, n1, n2) => {
     }, []);
 };
 
+const drawInitialStructure = (root, drawingArea) => {
+
+    const nodeWidth = drawingArea.width / (2 * (root.numCols + 1) + 1);
+    const nodeHeight = drawingArea.height / (2 * (root.numRows + 2));
+
+    const drawNode = node => {
+        drawingArea.drawNodeRect(node);
+        drawingArea.drawDot(node.nwx, node.nwy);
+        drawingArea.drawDot(node.nex, node.ney);
+        drawingArea.drawDot(node.swx, node.swy);
+        drawingArea.drawDot(node.sex, node.sey);
+    };
+
+    root.allNodes.forEach(bless(nodeWidth, nodeHeight));
+    drawingArea.drawBorders();
+    root.allNodes.forEach(drawNode);
+};
+
 const drawLinks = (root, drawingArea) => {
 
     const drawHorizontalLinks = n => {
 
         const rightTweeners = findTweenersHorizontally(root, n, n.right);
         if (rightTweeners.length) {
-            drawingArea.drawGoingAroundRightLink(n, n.right, rightTweeners);
+            drawingArea.drawRightGoingAroundLink(n, n.right, rightTweeners);
         }
         else {
-            drawingArea.drawNormalRightLink(n, n.right);
+            drawingArea.drawRightNormalLink(n, n.right);
         }
 
         const leftTweeners = findTweenersHorizontally(root, n.left, n);
         if (leftTweeners.length) {
-            drawingArea.drawGoingAroundLeftLink(n, n.left, leftTweeners);
+            drawingArea.drawLeftGoingAroundLink(n, n.left, leftTweeners);
         }
         else {
-            drawingArea.drawNormalLeftLink(n, n.left);
+            drawingArea.drawLeftNormalLink(n, n.left);
         }
     };
 
@@ -181,18 +181,18 @@ const drawLinks = (root, drawingArea) => {
 
         const downTweeners = findTweenersVertically(root, n, n.down);
         if (downTweeners.length) {
-            drawingArea.drawGoingAroundDownLink(n, n.down, downTweeners);
+            drawingArea.drawDownGoingAroundLink(n, n.down, downTweeners);
         }
         else {
-            drawingArea.drawNormalDownLink(n, n.down);
+            drawingArea.drawDownNormalLink(n, n.down);
         }
 
         const upTweeners = findTweenersVertically(root, n.up, n);
         if (upTweeners.length) {
-            drawingArea.drawGoingAroundUpLink(n, n.up, upTweeners);
+            drawingArea.drawUpGoingAroundLink(n, n.up, upTweeners);
         }
         else {
-            drawingArea.drawNormalUpLink(n, n.up);
+            drawingArea.drawUpNormalLink(n, n.up);
         }
     };
 
