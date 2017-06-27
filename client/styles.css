@@ -10,6 +10,7 @@ html, body {
 #svg {
     background-color: aliceblue;
     margin-top: 20px;
+    width: 100%;
 }
 
 .border {

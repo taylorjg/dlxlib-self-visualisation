@@ -12,7 +12,8 @@ export class DrawingAreaSvg {
     constructor(svg) {
         this.svg = svg;
         this.width = this.svg.scrollWidth;
-        this.height = this.svg.scrollHeight;
+        this.svg.style.height = this.width;
+        this.height = this.width;
         this.elements = [];
         this.coveredNodes = [];
     }
