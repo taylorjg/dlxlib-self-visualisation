@@ -34,8 +34,8 @@ const findAllNodes = root => {
     return nodes;
 };
 
-const findNode = (allNodes, colIndex, rowIndex) =>
-    allNodes.find(n => n.colIndex === colIndex && n.rowIndex === rowIndex);
+const findNode = (root, colIndex, rowIndex) =>
+    root.allNodes.find(n => n.colIndex === colIndex && n.rowIndex === rowIndex);
 
 const calcDimensions = allNodes => {
     const maxColIndex = allNodes.reduce((acc, n) => Math.max(acc, n.colIndex), 0);
@@ -115,7 +115,7 @@ const findTweenersHorizontally = (root, n1, n2) => {
         : makeRange2(n2.colIndex, n1.colIndex, root.numCols, rowIndex === -1);
 
     return range.reduce((acc, colIndex) => {
-        const tweener = findNode(root.allNodes, colIndex, rowIndex);
+        const tweener = findNode(root, colIndex, rowIndex);
         if (tweener) acc.push(tweener);
         return acc;
     }, []);
@@ -130,7 +130,7 @@ const findTweenersVertically = (root, n1, n2) => {
         : makeRange2(n2.rowIndex, n1.rowIndex, root.numRows, true);
 
     return range.reduce((acc, rowIndex) => {
-        const tweener = findNode(root.allNodes, colIndex, rowIndex);
+        const tweener = findNode(root, colIndex, rowIndex);
         if (tweener) acc.push(tweener);
         return acc;
     }, []);
@@ -303,8 +303,11 @@ const onStep = index => {
         preSubMatrix.innerHTML = subMatrixText;
         prePartialSolution.innerHTML = partialSolutionText;
         const onNodeClick = function (e) {
-            const links = linksMap.get(e.target.node);
-            console.log(`links: ${JSON.stringify(links)}`);
+            const colIndex = Number(e.target.getAttribute('data-col-index'));
+            const rowIndex = Number(e.target.getAttribute('data-row-index'));
+            const node = findNode(root, colIndex, rowIndex);
+            const links = linksMap.get(node);
+            console.log(`colIndex: ${colIndex}; rowIndex: ${rowIndex}; links: ${JSON.stringify(links)}`);
         };
         root.allNodes.forEach(n => drawingArea.removeClickHandler(n));
         root.allNodes.forEach(n => drawingArea.addClickHandler(n, onNodeClick));

@@ -12,7 +12,7 @@ export class DrawingAreaSvg {
     constructor(svg) {
         this.svg = svg;
         this.width = this.svg.scrollWidth;
-        this.height  = this.svg.scrollHeight;
+        this.height = this.svg.scrollHeight;
         this.elements = [];
         this.coveredNodes = [];
     }
@@ -82,13 +82,20 @@ export class DrawingAreaSvg {
     }
 
     drawNodeRect(node) {
+
+        const additionalAttributes = {
+            ['data-coords']: this.nodeToCoordsString(node),
+            ['data-col-index']: node.colIndex,
+            ['data-row-index']: node.rowIndex
+        };
+
         this.createRect(
             node.x,
             node.y,
             node.width,
             node.height,
             NORMAL_NODE_CSS_CLASS,
-            { ['data-coords']: this.nodeToCoordsString(node) });
+            additionalAttributes);
     }
 
     drawRightArrowHead(apex, cssClass) {
@@ -174,7 +181,7 @@ export class DrawingAreaSvg {
         const f1 = (b1 + h1) / 2;
         const c1 = e1;
         const d1 = b1;
-        
+
         const a2 = lastTweener.swx;
         const b2 = h1;
         const g2 = a2 - lastTweener.width;
@@ -241,7 +248,7 @@ export class DrawingAreaSvg {
         const f1 = (b1 + h1) / 2;
         const c1 = a1;
         const d1 = f1;
-        
+
         const a2 = g1;
         const b2 = lastTweener.nwy;
         const g2 = a1;
