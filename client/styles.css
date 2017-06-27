@@ -3,9 +3,8 @@ html, body {
     height: 100%;
 }
 
-#canvas {
-    background-color: aliceblue;
-    margin: 10px;
+#version {
+    font-style: italic;
 }
 
 #svg {
@@ -13,19 +12,52 @@ html, body {
     margin: 10px;
 }
 
+#selMatrix {
+    margin-left: 10px;
+    margin-bottom: 10px;    
+}
+
 button {
     margin-left: 10px;
 }
 
-#version {
-    font-style: italic;
+.border {
+    stroke: green;
+    stroke-width: 1;
+    stroke-dasharray: 1, 4;
 }
 
-.covered {
+.normal-node {
+    stroke: green;
+    stroke-width: 1;
+    fill-opacity: 0;
+}
+
+.covered-node {
     stroke: yellow;
+    stroke-width: 1;
+    fill-opacity: 0;
 }
 
-#selMatrix {
-    margin-left: 10px;
-    margin-bottom: 10px;    
+.dot {
+    fill: green;
+}
+
+.normal-link {
+    stroke: green;
+    stroke-width: 1;
+}
+
+.going-around-link {
+    stroke: red;
+    stroke-width: 1;
+    fill-opacity: 0;
+}
+
+.normal-arrow-head {
+    fill: green;
+}
+
+.going-around-arrow-head {
+    fill: red;
 }
