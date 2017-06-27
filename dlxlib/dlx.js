@@ -36,14 +36,16 @@ import { ColumnObject } from './columnObject';
 /**
  * Solves the matrix and returns an array of solutions.
  * @param {Matrix} matrix The matrix to be solved.
- * @param {searchStepCallback} [onSearchStep] A callback to be invoked for each step of the algorithm.
- * @param {solutionFoundCallback} [onSolutionFound] A callback to be invoked for each solution found.
- * @param {number} [n] The number of solutions to be returned. By default, all solutions are returned.
+ * @param {Object} [options] An options object.
+ * @param {searchStepCallback} options.onSearchStep A callback invoked for each step of the algorithm.
+ * @param {solutionFoundCallback} options.onSolutionFound A callback invoked for each solution found.
+ * @param {Number} options.numSolutions The number of solutions to return.
+ * @param {Object} options.columnChooser How to choose column 'c'.
  * @returns {Solution[]} The solutions that were found.
  */
-export const solve = (matrix, onSearchStep, onSolutionFound, n) => {
-    const generator = solutionGenerator(matrix, onSearchStep, onSolutionFound);
-    const max = n || Number.MAX_VALUE;
+export const solve = (matrix, options) => {
+    const generator = solutionGenerator(matrix, options);
+    const max = options.n || Number.MAX_VALUE;
     const solutions = [];
     for (let i = 0; i < max; i++) {
         const iteratorResult = generator.next();
@@ -56,13 +58,16 @@ export const solve = (matrix, onSearchStep, onSolutionFound, n) => {
 /**
  * Creates an ES2015 Generator object that can be used to iterate over the solutions to the matrix.
  * @param {Matrix} matrix The matrix to be solved.
- * @param {searchStepCallback} [onSearchStep] A callback to be invoked for each step of the algorithm.
- * @param {solutionFoundCallback} [onSolutionFound] A callback to be invoked for each solution found.
+ * @param {Object} [options] An options object.
+ * @param {searchStepCallback} options.onSearchStep A callback invoked for each step of the algorithm.
+ * @param {solutionFoundCallback} options.onSolutionFound A callback invoked for each solution found.
+ * @param {Number} options.numSolutions The number of solutions to return.
+ * @param {Object} options.columnChooser How to choose column 'c'.
  * @returns {IterableIterator.<number>} An ES2015 Generator object that can be used to iterate over the solutions.
  */
-export const solutionGenerator = function* (matrix, onSearchStep, onSolutionFound) {
+export const solutionGenerator = function* (matrix, options) {
     const root = buildInternalStructure(matrix);
-    const searchState = new SearchState(root, onSearchStep, onSolutionFound);
+    const searchState = new SearchState(root, options || {});
     yield* search(searchState);
 };
 
@@ -105,7 +110,7 @@ function* search(searchState) {
         return;
     }
 
-    const c = chooseColumnWithFewestRows(searchState);
+    const c = chooseColumn(searchState);
     coverColumn(c);
     for (let r = c.down; r !== c; r = r.down) {
         searchState.pushRowIndex(r.rowIndex);
@@ -116,6 +121,14 @@ function* search(searchState) {
     }
     uncoverColumn(c);
 }
+
+const chooseColumn = searchState => {
+    switch (searchState.columnChooser) {
+        case 1: return searchState.root.right;
+        case 2: return searchState.root.left;
+        default: return chooseColumnWithFewestRows(searchState);
+    }
+};
 
 const chooseColumnWithFewestRows = searchState => {
     let chosenColumn = null;
@@ -139,10 +152,11 @@ const uncoverColumn = c => {
 
 class SearchState {
 
-    constructor(root, onSearchStep, onSolutionFound) {
+    constructor(root, options) {
         this.root = root;
-        this.onSearchStep = onSearchStep;
-        this.onSolutionFound = onSolutionFound;
+        this.onSearchStep = options.onSearchStep;
+        this.onSolutionFound = options.onSolutionFound;
+        this.columnChooser = options.columnChooser || 0;
         this.currentSolution = [];
     }
 

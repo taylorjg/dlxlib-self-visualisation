@@ -213,6 +213,7 @@ const svg = document.getElementById('svg');
 const preSubMatrix = document.getElementById('preSubMatrix');
 const prePartialSolution = document.getElementById('prePartialSolution');
 const selMatrix = document.getElementById('selMatrix');
+const selColumnChooser = document.getElementById('selColumnChooser');
 const btnFirstStep = document.getElementById('btnFirstStep');
 const btnStepBackwards = document.getElementById('btnStepBackwards');
 const btnStepForwards = document.getElementById('btnStepForwards');
@@ -341,21 +342,30 @@ const onSearchStep = matrix => (rowIndices, root) => {
     searchSteps.push({ root, drawingArea, subMatrixText, partialSolutionText, linksMap });
 };
 
-const selectMatrix = matrix => {
+const solveMatrix = () => {
+
+    const matrixIndex = Number(selMatrix.value);
+    const columnChooser = Number(selColumnChooser.value);
+
+    const matrix = MATRICES[matrixIndex];
+
     searchSteps.splice(0);
     Array.from(svg.children).forEach(element => element.remove());
-    const solutions = solve(matrix, onSearchStep(matrix));
+
+    const options = {
+        onSearchStep: onSearchStep(matrix),
+        columnChooser
+    };
+    
+    const solutions = solve(matrix, options);
+
     solutions.forEach((solution, index) =>
         console.log(`solution[${index}]: ${JSON.stringify(solution)}`));
+
     onStep(0);
 };
 
-const onChangeSelectedMatrix = () => {
-    const matrixIndex = Number(selMatrix.value);
-    const matrix = MATRICES[matrixIndex];
-    selectMatrix(matrix);
-};
+selMatrix.addEventListener('change', solveMatrix);
+selColumnChooser.addEventListener('change', solveMatrix);
 
-selMatrix.addEventListener('change', onChangeSelectedMatrix);
-
-onChangeSelectedMatrix();
+solveMatrix();
