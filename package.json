@@ -1,6 +1,6 @@
 {
   "name": "dlxlib-self-visualisation",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Visualisation of DLX links as the algorithm progresses",
   "scripts": {
     "start": "node server/app.js",
