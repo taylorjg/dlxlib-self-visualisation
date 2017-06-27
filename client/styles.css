@@ -31,6 +31,16 @@ html, body {
     fill-opacity: 0;
 }
 
+.column-header-name {
+    fill: green;
+    text-anchor: middle;
+}
+
+.column-header-row-count {
+    fill: green;
+    text-anchor: middle;
+}
+
 .dot {
     fill: green;
 }

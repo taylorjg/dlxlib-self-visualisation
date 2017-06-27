@@ -147,6 +147,9 @@ const drawInitialStructure = (root, drawingArea) => {
         drawingArea.drawDot(node.nex, node.ney);
         drawingArea.drawDot(node.swx, node.swy);
         drawingArea.drawDot(node.sex, node.sey);
+        if (node.rowIndex === -1 && node.colIndex >= 0) {
+            drawingArea.drawColumnHeaderName(node, COLUMN_NAMES[node.colIndex]);
+        }
     };
 
     root.allNodes.forEach(bless(nodeWidth, nodeHeight));
@@ -199,6 +202,9 @@ const drawLinks = (root, drawingArea) => {
     root.allNodes.forEach(n => {
         drawHorizontalLinks(n);
         drawVerticalLinks(n);
+        if (n.rowIndex === -1 && n.colIndex >= 0) {
+            drawingArea.drawColumnHeaderRowCount(n);
+        }
     });
 
     const allCurrentlyReachableNodes = findAllNodes(root);
@@ -298,6 +304,7 @@ const onStep = index => {
     if (searchSteps.length) {
         const { root, drawingArea, subMatrixText, partialSolutionText, linksMap } = searchSteps[currentSearchStepIndex];
         drawingArea.removeLinks();
+        drawingArea.removeColumnHeaderRowCounts();
         drawingArea.resetCoveredNodes();
         drawingArea.insertElementsIntoDOM();
         drawingArea.setCoveredNodes();

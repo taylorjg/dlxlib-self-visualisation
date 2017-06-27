@@ -1,6 +1,8 @@
 const BORDER_CSS_CLASS = 'border';
 const NORMAL_NODE_CSS_CLASS = 'normal-node';
 const COVERED_NODE_CSS_CLASS = 'covered-node';
+const COLUMN_HEADER_NAME_CSS_CLASS = 'column-header-name';
+const COLUMN_HEADER_ROW_COUNT_CSS_CLASS = 'column-header-row-count';
 const DOT_CSS_CLASS = 'dot';
 const NORMAL_LINK_CSS_CLASS = 'link normal-link';
 const GOING_AROUND_LINK_CSS_CLASS = 'link going-around-link';
@@ -100,6 +102,24 @@ export class DrawingAreaSvg {
             node.height,
             NORMAL_NODE_CSS_CLASS,
             additionalAttributes);
+    }
+
+    drawColumnHeaderName(node, name) {
+        const text = this.createElement('text');
+        text.setAttribute('x', node.x + node.width * 0.5);
+        text.setAttribute('y', node.y + node.height * 0.4);
+        text.setAttribute('class', COLUMN_HEADER_NAME_CSS_CLASS);
+        text.appendChild(document.createTextNode(name));
+        this.elements.push(text);
+    }
+
+    drawColumnHeaderRowCount(node) {
+        const text = this.createElement('text');
+        text.setAttribute('x', node.x + node.width * 0.5);
+        text.setAttribute('y', node.y + node.height * 0.7);
+        text.setAttribute('class', COLUMN_HEADER_ROW_COUNT_CSS_CLASS);
+        text.appendChild(document.createTextNode(node.numberOfRows));
+        this.elements.push(text);
     }
 
     drawRightArrowHead(apex, cssClass) {
@@ -354,6 +374,11 @@ export class DrawingAreaSvg {
 
     removeLinks() {
         const links = document.getElementsByClassName('link');
+        Array.from(links).forEach(link => link.remove());
+    }
+
+    removeColumnHeaderRowCounts() {
+        const links = document.getElementsByClassName(COLUMN_HEADER_ROW_COUNT_CSS_CLASS);
         Array.from(links).forEach(link => link.remove());
     }
 
