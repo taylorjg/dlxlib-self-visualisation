@@ -7,6 +7,9 @@ const GOING_AROUND_LINK_CSS_CLASS = 'link going-around-link';
 const NORMAL_ARROW_HEAD_CSS_CLASS = 'link normal-arrow-head';
 const GOING_AROUND_ARROW_HEAD_CSS_CLASS = 'link going-around-arrow-head';
 
+const CURVE_FUDGE_FACTOR = 0.75;
+const DISPLACEMENT_FUDGE_FACTOR = 1.0;
+
 export class DrawingAreaSvg {
 
     constructor(svg) {
@@ -139,9 +142,9 @@ export class DrawingAreaSvg {
 
         const firstTweener = tweeners[0];
         const lastTweener = tweeners[tweeners.length - 1];
-        const displacement = (n1.nex - n1.nwx) * 1.2;
+        const displacement = (n1.nex - n1.nwx) * DISPLACEMENT_FUDGE_FACTOR;
 
-        const a1 = firstTweener.nwx - firstTweener.width;
+        const a1 = firstTweener.nwx - firstTweener.width * CURVE_FUDGE_FACTOR;
         const b1 = firstTweener.ney;
         const g1 = firstTweener.nwx;
         const h1 = b1 - displacement;
@@ -152,7 +155,7 @@ export class DrawingAreaSvg {
 
         const a2 = lastTweener.nex;
         const b2 = h1;
-        const g2 = a2 + lastTweener.width;
+        const g2 = a2 + lastTweener.width * CURVE_FUDGE_FACTOR;
         const h2 = b1;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
@@ -172,9 +175,9 @@ export class DrawingAreaSvg {
     drawLeftGoingRoundLinkHelper(n1, n2, tweeners, fromEdge) {
 
         const lastTweener = tweeners[tweeners.length - 1];
-        const displacement = (n1.nex - n1.nwx) * 1.2;
+        const displacement = (n1.nex - n1.nwx) * DISPLACEMENT_FUDGE_FACTOR;
 
-        const a1 = lastTweener.sex + lastTweener.width;
+        const a1 = lastTweener.sex + lastTweener.width * CURVE_FUDGE_FACTOR;
         const b1 = lastTweener.sey;
         const g1 = lastTweener.sex;
         const h1 = b1 + displacement;
@@ -185,7 +188,7 @@ export class DrawingAreaSvg {
 
         const a2 = lastTweener.swx;
         const b2 = h1;
-        const g2 = a2 - lastTweener.width;
+        const g2 = a2 - lastTweener.width * CURVE_FUDGE_FACTOR;
         const h2 = b1;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
@@ -206,10 +209,10 @@ export class DrawingAreaSvg {
 
         const firstTweener = tweeners[0];
         const lastTweener = tweeners[tweeners.length - 1];
-        const displacement = (n1.nex - n2.nwx) * 1.2;
+        const displacement = (n1.nex - n2.nwx) * DISPLACEMENT_FUDGE_FACTOR;
 
         const a1 = firstTweener.nex;
-        const b1 = firstTweener.ney - firstTweener.width;
+        const b1 = firstTweener.ney - firstTweener.width * CURVE_FUDGE_FACTOR;
         const g1 = a1 + displacement;
         const h1 = firstTweener.ney;
         const e1 = (a1 + g1) / 2;
@@ -220,7 +223,7 @@ export class DrawingAreaSvg {
         const a2 = g1;
         const b2 = lastTweener.sey;
         const g2 = a1;
-        const h2 = lastTweener.sey + lastTweener.width;
+        const h2 = lastTweener.sey + lastTweener.width * CURVE_FUDGE_FACTOR;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
         const c2 = a2;
@@ -239,10 +242,10 @@ export class DrawingAreaSvg {
     drawUpGoingRoundLinkHelper(n1, n2, tweeners, fromEdge) {
 
         const lastTweener = tweeners[tweeners.length - 1];
-        const displacement = (n1.nex - n1.nwx) * 1.2;
+        const displacement = (n1.nex - n1.nwx) * DISPLACEMENT_FUDGE_FACTOR;
 
         const a1 = lastTweener.swx;
-        const b1 = lastTweener.swy + lastTweener.width;
+        const b1 = lastTweener.swy + lastTweener.width * CURVE_FUDGE_FACTOR;
         const g1 = a1 - displacement;
         const h1 = lastTweener.swy;
         const e1 = (a1 + g1) / 2;
@@ -253,7 +256,7 @@ export class DrawingAreaSvg {
         const a2 = g1;
         const b2 = lastTweener.nwy;
         const g2 = a1;
-        const h2 = b2 - lastTweener.width;
+        const h2 = b2 - lastTweener.width * CURVE_FUDGE_FACTOR;
         const e2 = (a2 + g2) / 2;
         const f2 = (b2 + h2) / 2;
         const c2 = a2;
