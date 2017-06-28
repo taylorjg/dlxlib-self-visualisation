@@ -54,8 +54,8 @@ colIndex: 2; rowIndex: -1; links: {"right":{"colIndex":4,"rowIndex":-1},"left":{
     * non-adjacent links are drawn as curved red paths 
     * when non-adjacent, we need to identify the covered nodes between the `from` node and the `to` node
         * I call these the `tweeners`
-        * it is a bit complicated when the non-adjacent link wraps around
-            * see `makeRange1` vs `makeRange2`
+        * we need to handle non-adjacent links that wrap around
+            * see `makeNormalRange()` and `makeWrapAroundRange()`
     * we can calculate the `tweeners` by examining `allNodes`
 
 ## Links

@@ -97,24 +97,27 @@ const bless = (nodeWidth, nodeHeight) => node => {
     node.sey = node.y + node.height - inset;
 };
 
-const makeRange1 = (l, h) => {
-    return Array.from(Array(h - l - 1).keys()).map(x => x + l + 1);
-};
+// Return the array of indices between l and h (excluding l and h).
+// e.g. l = 2 and h = 5 => [3, 4]
+const makeNormalRange = (l, h) =>
+    Array.from(Array(h - l - 1).keys())
+        .map(x => x + l + 1);
 
-const makeRange2 = (l, h, numRowsOrCols, includeMinus1) => {
-    const v1 = includeMinus1 ? [-1] : [];
-    const v2 = v1.concat(Array.from(Array(numRowsOrCols).keys()));
-    const v4 = v2.filter(x => x < l || x > h);
-    return v4;
-};
+// Return the array of indices before l and after h (excluding l and h).
+// Note that the indices are returned in ascending order.
+// e.g. l = 2, h = 5, numRowsOrCols = 7 and includeMinus1 = true => [-1, 0, 1, 6]
+const makeWrapAroundRange = (l, h, numRowsOrCols, includeMinus1) =>
+    (includeMinus1 ? [-1] : [])
+        .concat(Array.from(Array(numRowsOrCols).keys()))
+        .filter(x => x < l || x > h);
 
 const findTweenersHorizontally = (root, n1, n2) => {
 
     const rowIndex = n1.rowIndex;
 
     const range = (n2.colIndex > n1.colIndex)
-        ? makeRange1(n1.colIndex, n2.colIndex)
-        : makeRange2(n2.colIndex, n1.colIndex, root.numCols, rowIndex === -1);
+        ? makeNormalRange(n1.colIndex, n2.colIndex)
+        : makeWrapAroundRange(n2.colIndex, n1.colIndex, root.numCols, rowIndex === -1);
 
     return range.reduce((acc, colIndex) => {
         const tweener = findNode(root, colIndex, rowIndex);
@@ -128,8 +131,8 @@ const findTweenersVertically = (root, n1, n2) => {
     const colIndex = n1.colIndex;
 
     const range = (n2.rowIndex > n1.rowIndex)
-        ? makeRange1(n1.rowIndex, n2.rowIndex)
-        : makeRange2(n2.rowIndex, n1.rowIndex, root.numRows, true);
+        ? makeNormalRange(n1.rowIndex, n2.rowIndex)
+        : makeWrapAroundRange(n2.rowIndex, n1.rowIndex, root.numRows, true);
 
     return range.reduce((acc, rowIndex) => {
         const tweener = findNode(root, colIndex, rowIndex);
@@ -369,7 +372,7 @@ const solveMatrix = () => {
         onSearchStep: onSearchStep(matrix),
         columnChooser
     };
-    
+
     const solutions = solve(matrix, options);
 
     solutions.forEach((solution, index) =>
