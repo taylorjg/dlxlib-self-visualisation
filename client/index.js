@@ -1,6 +1,7 @@
 import { solve } from '../dlxlib';
 import { DrawingAreaSvg } from './DrawingAreaSvg';
-import * as Hammer from 'hammerjs';
+// import * as Hammer from 'hammerjs';
+import 'hammerjs';
 
 const MATRIX1 = [
     [0, 0, 1, 0, 1, 1, 0],
@@ -328,13 +329,9 @@ btnStepBackwards.addEventListener('click', () => onStep(currentSearchStepIndex -
 btnStepForwards.addEventListener('click', () => onStep(currentSearchStepIndex + 1));
 btnLastStep.addEventListener('click', () => onStep(searchSteps.length - 1));
 
-const mc = new Hammer.Manager(svg);
-mc.on('swipeleft', () => {
-    onStep(currentSearchStepIndex + 1);
-});
-mc.on('swiperight', () => {
-    onStep(currentSearchStepIndex - 1);
-});
+const mc = new window.Hammer(svg);
+mc.on('swipeleft', () => onStep(currentSearchStepIndex + 1));
+mc.on('swiperight', () => onStep(currentSearchStepIndex - 1));
 
 const onSearchStep = matrix => (rowIndices, root) => {
 
