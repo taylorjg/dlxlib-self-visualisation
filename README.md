@@ -27,6 +27,37 @@ Finally, if you open the browser's developer tools and click on a node (avoiding
 colIndex: 2; rowIndex: -1; links: {"right":{"colIndex":4,"rowIndex":-1},"left":{"colIndex":-1,"rowIndex":-1},"down":{"colIndex":2,"rowIndex":0},"up":{"colIndex":2,"rowIndex":0},"rightTweeners":[{"colIndex":3,"rowIndex":-1}],"leftTweeners":[{"colIndex":0,"rowIndex":-1},{"colIndex":1,"rowIndex":-1}],"downTweeners":[],"upTweeners":[{"colIndex":2,"rowIndex":2}]}
 ```
 
+## Notes
+
+* It is possible to discover all nodes during the initial search step
+    * no nodes are covered so they are all reachable from `root`
+    * I call this `allNodes` (an array of all nodes representing the 1's in the matrix plus `root` and the column headers)
+    * we stash `allNodes` on `root` along with `numCols` and `numRows`
+
+* We only need to render the node rects and dots once because they never change in subsequent search steps
+    * only the links change
+
+* We need to take a snapshot of the state of all the links during `onSearchStep`
+    * because the whole internal data structure is mutable
+    * we create all the necessary SVG elements (lines and paths) re links and arrow heads during the search step
+    * we stash these in an array so that we can display the steps in response to navigation via the buttons
+    * to display a step:
+        * first remove all the previous step's SVG elements
+        * add all the step's SVG elements to the DOM document
+
+* Finding covered nodes for any search step involves take the diff of `allNodes` and all the currently reachable nodes (from `root`)
+    * we do this so that we can highlight all the covered nodes
+    * when switching to a new search step, we first reset the highlights
+
+* When drawing a link, we need to know whether the target node is an adjacent node or not
+    * adjacent links are drawn as straight green lines
+    * non-adjacent links are drawn as curved red paths 
+    * when non-adjacent, we need to identify the covered nodes between the `from` node and the `to` node
+        * I call these the `tweeners`
+        * it is a bit complicated when the non-adjacent link wraps around
+            * see `makeRange1` vs `makeRange2`
+    * we can calculate the `tweeners` by examining `allNodes`
+
 ## Links
 
 * [Knuth's original Dancing Links paper](https://arxiv.org/pdf/cs/0011047v1.pdf)
