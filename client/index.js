@@ -358,6 +358,13 @@ const onSearchStep = matrix => (rowIndices, root) => {
     searchSteps.push({ root, drawingArea, subMatrixText, partialSolutionText, linksMap });
 };
 
+const dumpSolution = matrix => (rowIndices, index) => {
+    console.log(`solution ${index}:`);
+    rowIndices
+        .map(rowIndex => `[row ${rowIndex}]: ${matrix[rowIndex]}`)
+        .forEach(line => console.log(line));
+};
+
 const solveMatrix = () => {
 
     const matrixIndex = Number(selMatrix.value);
@@ -374,9 +381,7 @@ const solveMatrix = () => {
     };
 
     const solutions = solve(matrix, options);
-
-    solutions.forEach((solution, index) =>
-        console.log(`solution[${index}]: ${JSON.stringify(solution)}`));
+    solutions.forEach(dumpSolution(matrix));
 
     onStep(0);
 };
