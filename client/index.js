@@ -294,7 +294,7 @@ const updateButtonState = () => {
 const onStep = index => {
     if (searchSteps.length) {
         if (index < 0) index = 0;
-        if (index > index.length - 1) index = index.length - 1;
+        if (index > searchSteps.length - 1) index = searchSteps.length - 1;
         currentSearchStepIndex = index;
         lblSearchStep.style.display = 'inline';
         lblSearchStep.innerText = `(search step ${currentSearchStepIndex + 1} of ${searchSteps.length})`;
