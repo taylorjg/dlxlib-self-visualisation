@@ -4,7 +4,13 @@
 
 [dlxlib](https://www.npmjs.com/package/dlxlib) is a JavaScript implementation of
 [Dancing Links](http://en.wikipedia.org/wiki/Dancing_Links).
-This little web app visualises the manipulation of the links within the internal data structures of [dlxlib](https://www.npmjs.com/package/dlxlib) as the algorithm progresses. At each step, every right, left, up and down link is visualised. Also, the submatrix and partial solution rows are shown. Use the navigation buttons to step through the algorithm as it solves the matrix.
+This little web app visualises the manipulation of the links within the internal data structures of [dlxlib](https://www.npmjs.com/package/dlxlib) as the algorithm progresses.
+
+    > **NOTE:** this repo uses a local copy of [dlxlib](https://www.npmjs.com/package/dlxlib)
+    > with a few small changes in order to expose the internal data structures that would
+    > normally remain hidden.
+
+At each step, every right, left, up and down link is visualised. Also, the submatrix and partial solution rows are shown. Use the navigation buttons to step through the algorithm as it solves the matrix.
 
 I have also included the ability to change how the algorithm chooses column `c`.
 There are three possibilities:
