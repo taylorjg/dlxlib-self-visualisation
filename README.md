@@ -10,7 +10,7 @@ This little web app visualises the manipulation of the links within the internal
 > with a few small changes in order to expose the internal data structures that would
 > normally remain hidden.
 
-At each step, every right, left, up and down link is visualised. Also, the submatrix and partial solution rows are shown. Use the navigation buttons to step through the algorithm as it solves the matrix.
+At each step, every right, left, up and down link is visualised. Also, the submatrix and partial solution rows are shown. Use the navigation buttons (or swipe the figure left/right on touch devices) to step through the algorithm as it solves the matrix.
 
 I have also included the ability to change how the algorithm chooses column `c`.
 There are three possibilities:
