@@ -1,6 +1,5 @@
 import { solve } from '../dlxlib';
 import { DrawingAreaSvg } from './DrawingAreaSvg';
-// import * as Hammer from 'hammerjs';
 import 'hammerjs';
 
 const MATRIX1 = [
@@ -21,7 +20,22 @@ const MATRIX2 = [
     [0, 0, 1, 0]
 ];
 
-const MATRICES = [MATRIX1, MATRIX2];
+const MATRIX3 = [
+    [1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0],
+    [0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0],
+    [0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0],
+    [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1],
+    [0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0],
+    [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0],
+    [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1]
+];
+
+const MATRICES = [MATRIX1, MATRIX2, MATRIX3];
 
 const CODE_POINT_A = 'A'.codePointAt(0);
 const COLUMN_NAMES = Array.from(Array(26).keys()).map((_, index) => String.fromCodePoint(CODE_POINT_A + index));
