@@ -341,14 +341,26 @@ const onStep = index => {
     }
 };
 
-btnFirstStep.addEventListener('click', () => onStep(0));
-btnStepBackwards.addEventListener('click', () => onStep(currentSearchStepIndex - 1));
-btnStepForwards.addEventListener('click', () => onStep(currentSearchStepIndex + 1));
-btnLastStep.addEventListener('click', () => onStep(searchSteps.length - 1));
+const navigateToFirstStep = () => onStep(0);
+const navigateToPreviousStep = () => onStep(currentSearchStepIndex - 1);
+const navigateToNextStep = () => onStep(currentSearchStepIndex + 1);
+const navigateToLastStep = () => onStep(searchSteps.length - 1);
+
+btnFirstStep.addEventListener('click', navigateToFirstStep);
+btnStepBackwards.addEventListener('click', navigateToPreviousStep);
+btnStepForwards.addEventListener('click', navigateToNextStep);
+btnLastStep.addEventListener('click', navigateToLastStep);
+
+document.addEventListener('keydown', e => {
+    switch (e.keyCode) {
+        case 37: return e.shiftKey ? navigateToFirstStep() : navigateToPreviousStep();
+        case 39: return e.shiftKey ? navigateToLastStep() : navigateToNextStep();
+    }
+});
 
 const mc = new window.Hammer(svg);
-mc.on('swipeleft', () => onStep(currentSearchStepIndex + 1));
-mc.on('swiperight', () => onStep(currentSearchStepIndex - 1));
+mc.on('swipeleft', navigateToNextStep);
+mc.on('swiperight', navigateToPreviousStep);
 
 const onSearchStep = matrix => (rowIndices, root) => {
 
