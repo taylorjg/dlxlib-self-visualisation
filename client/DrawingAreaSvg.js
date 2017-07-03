@@ -39,12 +39,24 @@ export class DrawingAreaSvg {
         this.goingAroundLinksMap.set(key, k);
     }
 
-    createElement(element) {
-        return document.createElementNS('http://www.w3.org/2000/svg', element);
+    handleAdditionalAttributes(element, additionalAttributes) {
+        if (additionalAttributes) {
+            Object.keys(additionalAttributes).forEach(k =>
+                element.setAttribute(k, additionalAttributes[k]));
+        }
     }
 
-    createLine(x1, y1, x2, y2, cssClass, colour) {
-        const line = this.createElement('line');
+    createElement(elementName, additionalAttributes) {
+        const element = document.createElementNS('http://www.w3.org/2000/svg', elementName);
+        if (additionalAttributes) {
+            Object.keys(additionalAttributes).forEach(k =>
+                element.setAttribute(k, additionalAttributes[k]));
+        }
+        return element;
+    }
+
+    createLine(x1, y1, x2, y2, cssClass, colour, additionalAttributes) {
+        const line = this.createElement('line', additionalAttributes);
         line.setAttribute('x1', x1);
         line.setAttribute('y1', y1);
         line.setAttribute('x2', x2);
@@ -56,8 +68,8 @@ export class DrawingAreaSvg {
         this.elements.push(line);
     }
 
-    createCircle(cx, cy, r, cssClass) {
-        const circle = this.createElement('circle');
+    createCircle(cx, cy, r, cssClass, additionalAttributes) {
+        const circle = this.createElement('circle', additionalAttributes);
         circle.setAttribute('cx', cx);
         circle.setAttribute('cy', cy);
         circle.setAttribute('r', r);
@@ -66,21 +78,17 @@ export class DrawingAreaSvg {
     }
 
     createRect(x, y, width, height, cssClass, additionalAttributes) {
-        const rect = this.createElement('rect');
+        const rect = this.createElement('rect', additionalAttributes);
         rect.setAttribute('x', x);
         rect.setAttribute('y', y);
         rect.setAttribute('width', width);
         rect.setAttribute('height', height);
         rect.setAttribute('class', cssClass);
-        if (additionalAttributes) {
-            Object.keys(additionalAttributes).forEach(k =>
-                rect.setAttribute(k, additionalAttributes[k]));
-        }
         this.elements.push(rect);
     }
 
-    createPath(data, cssClass, colour) {
-        const path = this.createElement('path');
+    createPath(data, cssClass, colour, additionalAttributes) {
+        const path = this.createElement('path', additionalAttributes);
         path.setAttribute('d', data);
         path.setAttribute('class', cssClass);
         if (colour) {
@@ -145,43 +153,43 @@ export class DrawingAreaSvg {
         this.elements.push(text);
     }
 
-    drawRightArrowHead(apex, cssClass, colour) {
+    drawRightArrowHead(apex, cssClass, colour, additionalAttributes) {
         const data = `
             M ${apex.x} ${apex.y}
             L ${apex.x - 5} ${apex.y - 2}
             L ${apex.x - 5} ${apex.y + 2}
             Z`;
-        this.createPath(data, cssClass, colour);
+        this.createPath(data, cssClass, colour, additionalAttributes);
     }
 
-    drawLeftArrowHead(apex, cssClass, colour) {
+    drawLeftArrowHead(apex, cssClass, colour, additionalAttributes) {
         const data = `
             M ${apex.x} ${apex.y}
             L ${apex.x + 5} ${apex.y - 2}
             L ${apex.x + 5} ${apex.y + 2}
             Z`;
-        this.createPath(data, cssClass, colour);
+        this.createPath(data, cssClass, colour, additionalAttributes);
     }
 
-    drawDownArrowHead(apex, cssClass, colour) {
+    drawDownArrowHead(apex, cssClass, colour, additionalAttributes) {
         const data = `
             M ${apex.x} ${apex.y}
             L ${apex.x - 2} ${apex.y - 5}
             L ${apex.x + 2} ${apex.y - 5}
             Z`;
-        this.createPath(data, cssClass, colour);
+        this.createPath(data, cssClass, colour, additionalAttributes);
     }
 
-    drawUpArrowHead(apex, cssClass, colour) {
+    drawUpArrowHead(apex, cssClass, colour, additionalAttributes) {
         const data = `
             M ${apex.x} ${apex.y}
             L ${apex.x - 2} ${apex.y + 5}
             L ${apex.x + 2} ${apex.y + 5}
             Z`;
-        this.createPath(data, cssClass, colour);
+        this.createPath(data, cssClass, colour, additionalAttributes);
     }
 
-    drawRightGoingAroundLinkHelper(n1, n2, tweeners, colour) {
+    drawRightGoingAroundLinkHelper(n1, n2, tweeners, colour, additionalAttributes) {
 
         const firstTweener = tweeners[0];
         const lastTweener = tweeners[tweeners.length - 1];
@@ -212,10 +220,10 @@ export class DrawingAreaSvg {
             L ${a2} ${b2}
             Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
 
-        this.createPath(data, GOING_AROUND_LINK_CSS_CLASS, colour);
+        this.createPath(data, GOING_AROUND_LINK_CSS_CLASS, colour, additionalAttributes);
     }
 
-    drawLeftGoingRoundLinkHelper(n1, n2, tweeners, colour, fromEdge) {
+    drawLeftGoingRoundLinkHelper(n1, n2, tweeners, colour, fromEdge, additionalAttributes) {
 
         const lastTweener = tweeners[tweeners.length - 1];
         const displacement = (n1.nex - n1.nwx) * DISPLACEMENT_FUDGE_FACTOR;
@@ -245,10 +253,10 @@ export class DrawingAreaSvg {
             L ${a2} ${b2}
             Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
 
-        this.createPath(data, GOING_AROUND_LINK_CSS_CLASS, colour);
+        this.createPath(data, GOING_AROUND_LINK_CSS_CLASS, colour, additionalAttributes);
     }
 
-    drawDownGoingAroundLinkHelper(n1, n2, tweeners, colour) {
+    drawDownGoingAroundLinkHelper(n1, n2, tweeners, colour, additionalAttributes) {
 
         const firstTweener = tweeners[0];
         const lastTweener = tweeners[tweeners.length - 1];
@@ -279,10 +287,10 @@ export class DrawingAreaSvg {
             L ${a2} ${b2}
             Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
 
-        this.createPath(data, GOING_AROUND_LINK_CSS_CLASS, colour);
+        this.createPath(data, GOING_AROUND_LINK_CSS_CLASS, colour, additionalAttributes);
     }
 
-    drawUpGoingRoundLinkHelper(n1, n2, tweeners, colour, fromEdge) {
+    drawUpGoingRoundLinkHelper(n1, n2, tweeners, colour, fromEdge, additionalAttributes) {
 
         const lastTweener = tweeners[tweeners.length - 1];
         const displacement = (n1.nex - n1.nwx) * DISPLACEMENT_FUDGE_FACTOR;
@@ -312,7 +320,7 @@ export class DrawingAreaSvg {
             L ${a2} ${b2}
             Q ${c2} ${d2}, ${e2} ${f2} T ${g2} ${h2}`;
 
-        this.createPath(data, GOING_AROUND_LINK_CSS_CLASS, colour);
+        this.createPath(data, GOING_AROUND_LINK_CSS_CLASS, colour, additionalAttributes);
     }
 
     drawRightNormalLink(n1, n2) {
@@ -328,10 +336,13 @@ export class DrawingAreaSvg {
     }
 
     drawRightGoingAroundLink(n1, n2, tweeners, k) {
+        const additionalAttributes = {
+            ['data-search-depth']: k
+        };
         this.addToGoingAroundLinksMap(n1, n2, 'R', k);
         const colour = SEARCH_DEPTH_COLOURS[k];
-        this.drawRightGoingAroundLinkHelper(n1, n2, tweeners, colour);
-        this.drawRightArrowHead({ x: n1.nex + (n1.width / 2) + 1, y: n1.ney }, GOING_AROUND_ARROW_HEAD_CSS_CLASS, colour);
+        this.drawRightGoingAroundLinkHelper(n1, n2, tweeners, colour, additionalAttributes);
+        this.drawRightArrowHead({ x: n1.nex + (n1.width / 2) + 1, y: n1.ney }, GOING_AROUND_ARROW_HEAD_CSS_CLASS, colour, additionalAttributes);
     }
 
     drawLeftNormalLink(n1, n2) {
@@ -347,16 +358,19 @@ export class DrawingAreaSvg {
     }
 
     drawLeftGoingAroundLink(n1, n2, tweeners, k) {
+        const additionalAttributes = {
+            ['data-search-depth']: k
+        };
         this.addToGoingAroundLinksMap(n1, n2, 'L', k);
         const colour = SEARCH_DEPTH_COLOURS[k];
         if (n1.colIndex > n2.colIndex) {
-            this.drawLeftGoingRoundLinkHelper(n1, n2, tweeners, colour);
+            this.drawLeftGoingRoundLinkHelper(n1, n2, tweeners, colour, false, additionalAttributes);
         }
         else {
-            this.createLine(n1.swx, n1.swy, 0, n1.swy, GOING_AROUND_LINK_CSS_CLASS, colour);
-            this.drawLeftGoingRoundLinkHelper(n1, n2, tweeners, colour, true);
+            this.createLine(n1.swx, n1.swy, 0, n1.swy, GOING_AROUND_LINK_CSS_CLASS, colour, additionalAttributes);
+            this.drawLeftGoingRoundLinkHelper(n1, n2, tweeners, colour, true, additionalAttributes);
         }
-        this.drawLeftArrowHead({ x: n1.swx - (n1.width / 2) - 1, y: n1.swy }, GOING_AROUND_ARROW_HEAD_CSS_CLASS, colour);
+        this.drawLeftArrowHead({ x: n1.swx - (n1.width / 2) - 1, y: n1.swy }, GOING_AROUND_ARROW_HEAD_CSS_CLASS, colour, additionalAttributes);
     }
 
     drawDownNormalLink(n1, n2) {
@@ -372,10 +386,13 @@ export class DrawingAreaSvg {
     }
 
     drawDownGoingAroundLink(n1, n2, tweeners, k) {
+        const additionalAttributes = {
+            ['data-search-depth']: k
+        };
         this.addToGoingAroundLinksMap(n1, n2, 'D', k);
         const colour = SEARCH_DEPTH_COLOURS[k];
-        this.drawDownGoingAroundLinkHelper(n1, n2, tweeners, colour);
-        this.drawDownArrowHead({ x: n1.sex, y: n1.sey + (n1.width / 2) + 1 }, GOING_AROUND_ARROW_HEAD_CSS_CLASS, colour);
+        this.drawDownGoingAroundLinkHelper(n1, n2, tweeners, colour, additionalAttributes);
+        this.drawDownArrowHead({ x: n1.sex, y: n1.sey + (n1.width / 2) + 1 }, GOING_AROUND_ARROW_HEAD_CSS_CLASS, colour, additionalAttributes);
     }
 
     drawUpNormalLink(n1, n2) {
@@ -391,16 +408,19 @@ export class DrawingAreaSvg {
     }
 
     drawUpGoingAroundLink(n1, n2, tweeners, k) {
+        const additionalAttributes = {
+            ['data-search-depth']: k
+        };
         this.addToGoingAroundLinksMap(n1, n2, 'U', k);
         const colour = SEARCH_DEPTH_COLOURS[k];
         if (n1.rowIndex > n2.rowIndex) {
-            this.drawUpGoingRoundLinkHelper(n1, n2, tweeners, colour);
+            this.drawUpGoingRoundLinkHelper(n1, n2, tweeners, colour, false, additionalAttributes);
         }
         else {
-            this.createLine(n1.nwx, n1.nwy, n1.nwx, 0, GOING_AROUND_LINK_CSS_CLASS, colour);
-            this.drawUpGoingRoundLinkHelper(n1, n2, tweeners, colour, true);
+            this.createLine(n1.nwx, n1.nwy, n1.nwx, 0, GOING_AROUND_LINK_CSS_CLASS, colour, additionalAttributes);
+            this.drawUpGoingRoundLinkHelper(n1, n2, tweeners, colour, true, additionalAttributes);
         }
-        this.drawUpArrowHead({ x: n1.nwx, y: n1.ney - (n1.width / 2) - 1 }, GOING_AROUND_ARROW_HEAD_CSS_CLASS, colour);
+        this.drawUpArrowHead({ x: n1.nwx, y: n1.ney - (n1.width / 2) - 1 }, GOING_AROUND_ARROW_HEAD_CSS_CLASS, colour, additionalAttributes);
     }
 
     removeLinks() {
@@ -432,7 +452,9 @@ export class DrawingAreaSvg {
     }
 
     insertElementsIntoDOM() {
-        this.elements.forEach(element => this.svg.appendChild(element));
+        const searchDepthOf = e => Number(e.getAttribute('data-search-depth'));
+        const sortedElements = this.elements.sort((e1, e2) => searchDepthOf(e1) - searchDepthOf(e2));
+        sortedElements.forEach(element => this.svg.appendChild(element));
     }
 
     removeClickHandler(node) {
