@@ -105,7 +105,7 @@ function* search(searchState) {
     if (searchState.isEmpty()) {
         if (searchState.currentSolution.length) {
             searchState.solutionFound();
-            yield searchState.currentSolution.slice().sort();
+            yield searchState.currentSolution.slice().sort((a, b) => a - b);
         }
         return;
     }

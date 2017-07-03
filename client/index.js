@@ -268,7 +268,7 @@ const populateSubMatrix = root => {
 
 const populatePartialSolution = (root, rowIndices) =>
     rowIndices
-        .map(rowIndex => `${rowIndex}: ${root.matrix[rowIndex].join(' ')}`)
+        .map(formatSolutionRow(root.matrix))
         .join(`\n`);
 
 const createLinksMap = root => {
@@ -372,10 +372,21 @@ const onSearchStep = matrix => (rowIndices, root) => {
     searchSteps.push({ root, drawingArea, subMatrixText, partialSolutionText, linksMap });
 };
 
+const rowIndexPadding = (matrix, rowIndex) => {
+    const cchRowIndex = rowIndex.toString().length;
+    const cchTotal = matrix.length.toString().length;
+    return ' '.repeat(cchTotal - cchRowIndex);
+};
+
+const formatSolutionRow = matrix => rowIndex => {
+    const padding = rowIndexPadding(matrix, rowIndex);
+    return `${rowIndex}:${padding} ${matrix[rowIndex].join(' ')}`;
+};
+
 const dumpSolution = matrix => (rowIndices, index) => {
     console.log(`solution ${index}:`);
     rowIndices
-        .map(rowIndex => `[row ${rowIndex}]: ${matrix[rowIndex]}`)
+        .map(formatSolutionRow(matrix))
         .forEach(line => console.log(line));
 };
 
