@@ -13,13 +13,17 @@ const CURVE_FUDGE_FACTOR = 0.75;
 const DISPLACEMENT_FUDGE_FACTOR = 1.0;
 
 const SEARCH_DEPTH_COLOURS = [
-    'green',
-    'red',
-    'blue',
-    'purple',
-    'orange',
-    'brown',
-    'violet'
+    'green', // 0
+    'red', // 1
+    'blue', // 2
+    'purple', // 3
+    'orange', // 4
+    'brown', // 5
+    'violet', // 6
+    'cyan', // 7
+    'indigo', // 8
+    'steelblue', // 9
+    'yellowgreen' // 10
 ];
 
 export class DrawingAreaSvg {
