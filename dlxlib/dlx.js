@@ -68,7 +68,7 @@ export const solve = (matrix, options) => {
 export const solutionGenerator = function* (matrix, options) {
     const root = buildInternalStructure(matrix);
     const searchState = new SearchState(root, options || {});
-    yield* search(searchState);
+    yield* search(searchState, 0);
 };
 
 const buildInternalStructure = matrix => {
@@ -98,9 +98,9 @@ const buildInternalStructure = matrix => {
     return root;
 };
 
-function* search(searchState) {
+function* search(searchState, k) {
 
-    searchState.searchStep();
+    searchState.searchStep(k);
 
     if (searchState.isEmpty()) {
         if (searchState.currentSolution.length) {
@@ -115,7 +115,7 @@ function* search(searchState) {
     for (let r = c.down; r !== c; r = r.down) {
         searchState.pushRowIndex(r.rowIndex);
         r.loopRight(j => coverColumn(j.listHeader));
-        yield* search(searchState);
+        yield* search(searchState, k + 1);
         r.loopLeft(j => uncoverColumn(j.listHeader));
         searchState.popRowIndex();
     }
@@ -172,9 +172,9 @@ class SearchState {
         this.currentSolution.pop();
     }
 
-    searchStep() {
+    searchStep(k) {
         if (this.onSearchStep) {
-            this.onSearchStep(this.currentSolution, this.root);
+            this.onSearchStep(k, this.currentSolution, this.root);
         }
     }
 

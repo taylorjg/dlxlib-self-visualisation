@@ -51,7 +51,7 @@ html, body {
 }
 
 .going-around-link {
-    stroke: red;
+    /*stroke: red;*/
     stroke-width: 1;
     fill-opacity: 0;
 }
@@ -61,5 +61,5 @@ html, body {
 }
 
 .going-around-arrow-head {
-    fill: red;
+    /*fill: red;*/
 }

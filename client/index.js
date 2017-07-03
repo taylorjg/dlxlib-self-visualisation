@@ -155,6 +155,15 @@ const findTweenersVertically = (root, n1, n2) => {
     }, []);
 };
 
+const findSearchDepthOfGoingAroundLink = (n1, n2, direction, defaultSearchDepth) => {
+    if (searchSteps.length === 0) return defaultSearchDepth;
+    const lastSearchStep = searchSteps[searchSteps.length - 1];
+    const lastDrawingArea = lastSearchStep.drawingArea;
+    const key = `(${n1.colIndex},${n1.rowIndex})-(${n2.colIndex},${n2.rowIndex})-${direction}`;
+    const value = lastDrawingArea.goingAroundLinksMap.get(key);
+    return (Number.isInteger(value)) ? value : defaultSearchDepth;
+};
+
 const drawInitialStructure = (root, drawingArea) => {
 
     const nodeWidth = drawingArea.width / (2 * (root.numCols + 1) + 1);
@@ -176,13 +185,14 @@ const drawInitialStructure = (root, drawingArea) => {
     root.allNodes.forEach(drawNode);
 };
 
-const drawLinks = (root, drawingArea) => {
+const drawLinks = (root, drawingArea, k) => {
 
     const drawHorizontalLinks = n => {
 
         const rightTweeners = findTweenersHorizontally(root, n, n.right);
         if (rightTweeners.length) {
-            drawingArea.drawRightGoingAroundLink(n, n.right, rightTweeners);
+            const searchDepth = findSearchDepthOfGoingAroundLink(n, n.right, 'R', k);
+            drawingArea.drawRightGoingAroundLink(n, n.right, rightTweeners, searchDepth);
         }
         else {
             drawingArea.drawRightNormalLink(n, n.right);
@@ -190,7 +200,8 @@ const drawLinks = (root, drawingArea) => {
 
         const leftTweeners = findTweenersHorizontally(root, n.left, n);
         if (leftTweeners.length) {
-            drawingArea.drawLeftGoingAroundLink(n, n.left, leftTweeners);
+            const searchDepth = findSearchDepthOfGoingAroundLink(n, n.left, 'L', k);
+            drawingArea.drawLeftGoingAroundLink(n, n.left, leftTweeners, searchDepth);
         }
         else {
             drawingArea.drawLeftNormalLink(n, n.left);
@@ -203,7 +214,8 @@ const drawLinks = (root, drawingArea) => {
 
         const downTweeners = findTweenersVertically(root, n, n.down);
         if (downTweeners.length) {
-            drawingArea.drawDownGoingAroundLink(n, n.down, downTweeners);
+            const searchDepth = findSearchDepthOfGoingAroundLink(n, n.down, 'D', k);
+            drawingArea.drawDownGoingAroundLink(n, n.down, downTweeners, searchDepth);
         }
         else {
             drawingArea.drawDownNormalLink(n, n.down);
@@ -211,7 +223,8 @@ const drawLinks = (root, drawingArea) => {
 
         const upTweeners = findTweenersVertically(root, n.up, n);
         if (upTweeners.length) {
-            drawingArea.drawUpGoingAroundLink(n, n.up, upTweeners);
+            const searchDepth = findSearchDepthOfGoingAroundLink(n, n.up, 'U', k);
+            drawingArea.drawUpGoingAroundLink(n, n.up, upTweeners, searchDepth);
         }
         else {
             drawingArea.drawUpNormalLink(n, n.up);
@@ -362,7 +375,9 @@ const mc = new window.Hammer(svg);
 mc.on('swipeleft', navigateToNextStep);
 mc.on('swiperight', navigateToPreviousStep);
 
-const onSearchStep = matrix => (rowIndices, root) => {
+const onSearchStep = matrix => (k, rowIndices, root) => {
+
+    console.log(`[onSearchStep] k: ${k}`);
 
     if (searchSteps.length === 0) {
         const allNodes = findAllNodes(root);
@@ -377,7 +392,7 @@ const onSearchStep = matrix => (rowIndices, root) => {
     }
 
     const drawingArea = new DrawingAreaSvg(svg);
-    drawLinks(root, drawingArea);
+    drawLinks(root, drawingArea, k);
     const subMatrixText = populateSubMatrix(root);
     const partialSolutionText = populatePartialSolution(root, rowIndices);
     const linksMap = createLinksMap(root);
