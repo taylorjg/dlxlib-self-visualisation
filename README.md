@@ -12,6 +12,20 @@ This little web app visualises the manipulation of the links within the internal
 
 At each step, every right, left, up and down link is visualised. Also, the submatrix and partial solution rows are shown. Use the navigation buttons (or swipe the figure left/right on touch devices) to step through the algorithm as it solves the matrix.
 
+If you click on a node, details of its links are displayed e.g.:
+
+```
+node:             (E, 7)
+right:            (H, 7)
+left:             (C, 7)
+down:             (E, -1)
+up:               (E, -1)
+right tweeners:   
+left tweeners:    
+down tweeners:    
+up tweeners:      [(E, 0), (E, 3)]
+```
+
 I have also included the ability to change how the algorithm chooses column `c`.
 There are three possibilities:
 
@@ -20,12 +34,6 @@ There are three possibilities:
 * Rightmost uncovered column
 
 It is interesting to observe how this changes the course of the algorithm (although the same solution(s) are found).
-
-Finally, if you open the browser's developer tools and click on a node (avoiding the column name and row count), information about the node's links is written to the console:
-
-```
-colIndex: 2; rowIndex: -1; links: {"right":{"colIndex":4,"rowIndex":-1},"left":{"colIndex":-1,"rowIndex":-1},"down":{"colIndex":2,"rowIndex":0},"up":{"colIndex":2,"rowIndex":0},"rightTweeners":[{"colIndex":3,"rowIndex":-1}],"leftTweeners":[{"colIndex":0,"rowIndex":-1},{"colIndex":1,"rowIndex":-1}],"downTweeners":[],"upTweeners":[{"colIndex":2,"rowIndex":2}]}
-```
 
 ## Notes
 

@@ -250,6 +250,7 @@ let currentSearchStepIndex;
 const svg = document.getElementById('svg');
 const preSubMatrix = document.getElementById('preSubMatrix');
 const prePartialSolution = document.getElementById('prePartialSolution');
+const preSelectedNodeDetails = document.getElementById('preSelectedNodeDetails');
 const selMatrix = document.getElementById('selMatrix');
 const selColumnChooser = document.getElementById('selColumnChooser');
 const btnFirstStep = document.getElementById('btnFirstStep');
@@ -283,6 +284,34 @@ const populatePartialSolution = (root, rowIndices) =>
     rowIndices
         .map(formatSolutionRow(root.matrix))
         .join(`\n`);
+
+const populateSelectedNodeDetails = (node, links) => {
+    if (node) {
+        const formatCoords = coords => `(${COLUMN_NAMES[coords.colIndex] || '-1'}, ${coords.rowIndex})`;
+        const formatCoordsArray = coordsArray => coordsArray.length ? `[${coordsArray.map(formatCoords).join(', ')}]` : '';
+        const lines = [];
+        const appendLine = (label, text) => {
+            const padding = ' '.repeat(16 - label.length);
+            lines.push(`${label}:${padding} ${text}`);
+        };
+        appendLine('node', formatCoords(node));
+        appendLine('right', formatCoords(links.right));
+        appendLine('left', formatCoords(links.left));
+        appendLine('down', formatCoords(links.down));
+        appendLine('up', formatCoords(links.up));
+        appendLine('right tweeners', formatCoordsArray(links.rightTweeners));
+        appendLine('left tweeners', formatCoordsArray(links.leftTweeners));
+        appendLine('down tweeners', formatCoordsArray(links.downTweeners));
+        appendLine('up tweeners', formatCoordsArray(links.upTweeners));
+        preSelectedNodeDetails.innerHTML = lines.join('\n');
+        preSelectedNodeDetails.style.display = 'block';
+        preSelectedNodeDetails.previousElementSibling.style.display = 'block';
+    }
+    else {
+        preSelectedNodeDetails.style.display = 'none';
+        preSelectedNodeDetails.previousElementSibling.style.display = 'none';
+    }
+};        
 
 const createLinksMap = root => {
     const makeCoords = n => ({
@@ -343,12 +372,13 @@ const onStep = index => {
         drawingArea.setCoveredNodes();
         preSubMatrix.innerHTML = subMatrixText;
         prePartialSolution.innerHTML = partialSolutionText;
+        populateSelectedNodeDetails();
         const onNodeClick = function (e) {
             const colIndex = Number(e.target.getAttribute('data-col-index'));
             const rowIndex = Number(e.target.getAttribute('data-row-index'));
             const node = findNode(root, colIndex, rowIndex);
             const links = linksMap.get(node);
-            console.log(`colIndex: ${colIndex}; rowIndex: ${rowIndex}; links: ${JSON.stringify(links)}`);
+            populateSelectedNodeDetails(node, links);
         };
         root.allNodes.forEach(n => drawingArea.removeClickHandler(n));
         root.allNodes.forEach(n => drawingArea.addClickHandler(n, onNodeClick));
@@ -377,8 +407,6 @@ mc.on('swipeleft', navigateToNextStep);
 mc.on('swiperight', navigateToPreviousStep);
 
 const onSearchStep = matrix => (k, rowIndices, root) => {
-
-    console.log(`[onSearchStep] k: ${k}`);
 
     if (searchSteps.length === 0) {
         const allNodes = findAllNodes(root);
