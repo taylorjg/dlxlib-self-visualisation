@@ -323,8 +323,9 @@ const onStep = index => {
         if (index < 0) index = 0;
         if (index > searchSteps.length - 1) index = searchSteps.length - 1;
         currentSearchStepIndex = index;
+        const { k } = searchSteps[currentSearchStepIndex];
         lblSearchStep.style.display = 'inline';
-        lblSearchStep.innerText = `(search step ${currentSearchStepIndex + 1} of ${searchSteps.length})`;
+        lblSearchStep.innerText = `search step ${currentSearchStepIndex + 1} of ${searchSteps.length}, search depth (k) = ${k}`;
     }
     else {
         currentSearchStepIndex = -1;
@@ -396,7 +397,7 @@ const onSearchStep = matrix => (k, rowIndices, root) => {
     const subMatrixText = populateSubMatrix(root);
     const partialSolutionText = populatePartialSolution(root, rowIndices);
     const linksMap = createLinksMap(root);
-    searchSteps.push({ root, drawingArea, subMatrixText, partialSolutionText, linksMap });
+    searchSteps.push({ root, drawingArea, subMatrixText, partialSolutionText, linksMap, k });
 };
 
 const rowIndexPadding = (matrix, rowIndex) => {
