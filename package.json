@@ -4,7 +4,9 @@
   "description": "Visualisation of DLX links as the algorithm progresses",
   "scripts": {
     "start": "node server/app.js",
-    "heroku-postbuild": "npm install --dev && webpack"
+    "heroku-postbuild": "npm install --dev && webpack",
+    "deploy": "gh-pages -d server/public",
+    "predeploy": "webpack"
   },
   "repository": {
     "type": "git",
@@ -27,6 +29,7 @@
     "webpack-dev-server": "^2.4.5"
   },
   "dependencies": {
-    "express": "^4.15.3"
+    "express": "^4.15.3",
+    "gh-pages": "^4.0.0"
   }
 }
