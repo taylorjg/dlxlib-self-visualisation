@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Self Visualisation of dlxlib</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <span class="pull-right">version: 0.0.31</span>
+        </div>
+        <div class="row">
+            <hr />
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label class="control-label" for="selMatrix">Choose a demo matrix:</label>
+                    <select class="form-control" id="selMatrix">
+                            <option value="0" selected>Matrix 1 (One Solution)</option>
+                            <option value="1">Matrix 2 (Three Solutions)</option>
+                            <option value="2">Matrix 3 (From Blog Post)</option>
+                        </select>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label class="control-label" for="selColumnChooser">Choose how to determine column 'c':</label>
+                    <select class="form-control" id="selColumnChooser">
+                            <option value="0" selected>Leftmost uncovered column with the fewest 1's</option>
+                            <option value="1">Leftmost uncovered column</option>
+                            <option value="2">Rightmost uncovered column</option>
+                        </select>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <div>
+                    <button id="btnFirstStep" class="btn btn-sm btn-primary" title="First step (SHIFT + left)"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
+                    <button id="btnStepBackwards" class="btn btn-sm btn-primary" title="Step backwards (left)"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
+                    <button id="btnStepForwards" class="btn btn-sm btn-primary" title="Step forwards (right)"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
+                    <button id="btnLastStep" class="btn btn-sm btn-primary" title="Last step (SHIFT + right)"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
+                    <span id="lblSearchStep"></span>
+                </div>
+                <svg id="svg"></svg>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <h2>Current Submatrix</h2>
+                <pre id="preSubMatrix"></pre>
+                <h2>Current Partial Solution</h2>
+                <pre id="prePartialSolution"></pre>
+                <h2>Selected Node Details</h2>
+                <pre id="preSelectedNodeDetails"></pre>
+            </div>
+        </div>
+    </div>
+<script type="text/javascript" src="bundle.js"></script></body>
+
+</html>
